@@ -5,8 +5,6 @@ import { prisma } from "@/lib/db";
 import { formatWaktu } from "@/lib/tanggal";
 import { FormSandi, TombolKeluarSemua } from "./form-sandi";
 
-export const metadata = { title: "Akun" };
-
 export default function HalamanAkun() {
   return (
     <>

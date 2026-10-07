@@ -6,8 +6,6 @@ import { prisma } from "@/lib/db";
 import { FormPegawai } from "../../form-pegawai";
 import { siapkanForm } from "../../siapkan-form";
 
-export const metadata = { title: "Ubah data pegawai" };
-
 export default function HalamanUbah({ params }: PageProps<"/data-tb/[id]/ubah">) {
   return (
     <Suspense fallback={<MemuatData baris={8} />}>

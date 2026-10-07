@@ -23,8 +23,6 @@ import {
 import { ISIAN } from "@/lib/data/formulir";
 import { formatTanggal, formatWaktu } from "@/lib/tanggal";
 
-export const metadata = { title: "Log Aktivitas" };
-
 type Parameter = Record<string, string | string[] | undefined>;
 
 export default function HalamanLog({ searchParams }: PageProps<"/log">) {

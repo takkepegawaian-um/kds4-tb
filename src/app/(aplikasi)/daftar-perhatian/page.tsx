@@ -11,8 +11,6 @@ import { pilihPerhatian } from "@/lib/data/perhatian";
 import { daftarPilihanForm } from "@/lib/pengaturan/baca";
 import { formatTanggal } from "@/lib/tanggal";
 
-export const metadata = { title: "Daftar Perhatian" };
-
 export default function HalamanDaftarPerhatian({ searchParams }: PageProps<"/daftar-perhatian">) {
   return (
     <>

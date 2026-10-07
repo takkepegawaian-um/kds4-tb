@@ -9,8 +9,6 @@ import { FormImpor } from "./form-impor";
 // Impor/ekspor ratusan baris bisa memakan beberapa detik di server (batas Vercel).
 export const maxDuration = 60;
 
-export const metadata = { title: "Impor dari Excel" };
-
 export default function HalamanImpor() {
   return (
     <>

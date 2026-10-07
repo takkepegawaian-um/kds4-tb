@@ -13,8 +13,6 @@ import { pengaturanAturan } from "@/lib/pengaturan/baca";
 import { formatTanggal, formatWaktu } from "@/lib/tanggal";
 import { TombolHapus, TombolPulihkan } from "./tombol-aksi";
 
-export const metadata = { title: "Detail pegawai" };
-
 export default function HalamanDetail({ params, searchParams }: PageProps<"/data-tb/[id]">) {
   return (
     <Suspense fallback={<MemuatData baris={8} />}>

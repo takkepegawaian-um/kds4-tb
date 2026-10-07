@@ -8,8 +8,6 @@ import { KOLOM_KATEGORI, STATUS_SK_SISTEM } from "@/lib/pengaturan/validasi";
 import { dariDb } from "@/lib/tanggal";
 import { FormParameter, FormRekapFakultas, FormRekapSk, KelolaLibur, KelolaPilihan, TabelAturan, TabelStatusSk } from "./bagian";
 
-export const metadata = { title: "Pengaturan" };
-
 const BAGIAN = [
   ["parameter", "Parameter"],
   ["aturan", "Aturan hambatan"],

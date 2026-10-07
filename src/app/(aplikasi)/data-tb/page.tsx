@@ -13,8 +13,6 @@ import { daftarPilihanForm } from "@/lib/pengaturan/baca";
 import { PanelSaring } from "@/components/panel-saring";
 import { formatTanggal, formatWaktu } from "@/lib/tanggal";
 
-export const metadata = { title: "Data TB" };
-
 const PER_HALAMAN = 50;
 
 export default function HalamanDataTb({ searchParams }: PageProps<"/data-tb">) {

@@ -2,8 +2,6 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { FormMasuk } from "./form-masuk";
 
-export const metadata = { title: "Masuk" };
-
 export default function HalamanMasuk() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-hijau-900 px-4 py-10">

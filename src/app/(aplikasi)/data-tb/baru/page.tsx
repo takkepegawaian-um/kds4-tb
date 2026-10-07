@@ -3,8 +3,6 @@ import { JudulHalaman, MemuatData } from "@/components/ui";
 import { FormPegawai } from "../form-pegawai";
 import { siapkanForm } from "../siapkan-form";
 
-export const metadata = { title: "Tambah pegawai" };
-
 export default function HalamanTambah() {
   return (
     <>

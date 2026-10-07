@@ -20,8 +20,6 @@ import { muatSemuaDihitung } from "@/lib/data/pegawai";
 import { daftarPilihanForm } from "@/lib/pengaturan/baca";
 import { formatTanggal } from "@/lib/tanggal";
 
-export const metadata = { title: "Ringkasan" };
-
 // Warna seri (sudah diuji dengan validator palet: lolos uji buta warna dan kontras).
 const WARNA_BEBAS = "#0f8a63";
 const WARNA_TETAP = "#b98424";

@@ -8,10 +8,8 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: {
-    default: "KDS4 — Monitor TB",
-    template: "%s · KDS4 — Monitor TB",
-  },
+  // Judul tab dibuat tetap di semua halaman (tidak ada metadata judul di halaman lain).
+  title: "KDS4-Monitor TB",
   description: "Pemantauan pegawai Tugas Belajar dan hambatan administrasinya.",
   robots: { index: false, follow: false },
 };
