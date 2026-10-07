@@ -47,17 +47,26 @@ Yang dibutuhkan di komputer: Node.js 22, Git, dan folder proyek ini (sudah ada).
 4. Buka halaman repositori di GitHub dan pastikan **tidak ada** berkas `.env`, `*.xlsx`,
    atau folder `backup/`. (Ketiganya sengaja diabaikan Git.)
 
-## Langkah 3. Buat database di Neon (wilayah Singapura)
+## Langkah 3. Buat database Neon lewat Vercel (disarankan)
 
-1. Di Neon, tekan **New Project**.
-2. **Project name**: `kds4`. **Region**: pilih **AWS Asia Pacific (Singapore)**.
-   Versi PostgreSQL: biarkan bawaan. Tekan **Create**.
-3. Buka **Connect** (atau *Connection details*). Salin **dua** alamat:
-   - alamat **Pooled connection** (berisi kata `-pooler`) → nanti menjadi `DATABASE_URL`
-   - alamat **langsung** (matikan pilihan *Connection pooling*; tanpa `-pooler`) →
-     nanti menjadi `DIRECT_URL`
+Neon dibuat dari dalam proyek Vercel, jadi alamat database terisi otomatis di pengaturan proyek.
 
-   Simpan sementara di tempat aman (bukan di chat/email). Alamat ini berisi kata sandi database.
+1. Buka proyek `kds4-tb` di Vercel → tab **Storage**.
+2. Tekan **Create Database** (atau *Add* / *Connect Store*) → pilih **Neon** (Postgres) → **Continue**.
+3. Pilih **Region: Singapore** (AWS ap-southeast-1). Pilih paket gratis (*Free*) → beri nama
+   `kds4` → **Create**.
+4. Pada langkah menghubungkan ke proyek: pilih proyek `kds4-tb`, centang semua *Environments*
+   (Production, Preview, Development). **Biarkan awalan variabel (*prefix*) kosong atau bawaan.**
+5. Buka **Settings → Environment Variables** dan pastikan ada (nilainya disembunyikan, itu normal):
+   - `DATABASE_URL` (alamat *pooled*)
+   - `DATABASE_URL_UNPOOLED` (alamat langsung, dipakai migrasi)
+
+   Bila namanya berbeda (mis. berawalan lain), tambahkan variabel `DATABASE_URL` dan
+   `DIRECT_URL` sendiri dengan menyalin nilainya dari variabel yang ada.
+
+> **Alternatif:** buat project langsung di <https://console.neon.tech> (wilayah **AWS Asia
+> Pacific (Singapore)**), lalu salin alamat *pooled* (ada `-pooler`) ke `DATABASE_URL` dan alamat
+> langsung (tanpa `-pooler`) ke `DIRECT_URL` secara manual di Vercel.
 
 ## Langkah 4. Buat rahasia login
 
@@ -77,21 +86,18 @@ Salin hasilnya. Ini menjadi `SESI_RAHASIA`. Jangan pakai nilai yang sama dengan 
    - wilayah server Singapura (`sin1`),
    - setiap pemasangan: terapkan struktur database → isi Pengaturan bawaan (tanpa menimpa
      perubahan Anda) → bangun aplikasi.
-3. Buka **Environment Variables**, isi tiga baris:
+3. Buka **Settings → Environment Variables**. Variabel database sudah terisi dari Langkah 3.
+   Tambahkan satu lagi:
 
    | Name | Value |
    |---|---|
-   | `DATABASE_URL` | alamat **Pooled** dari Neon |
-   | `DIRECT_URL` | alamat **langsung** dari Neon |
    | `SESI_RAHASIA` | hasil Langkah 4 |
 
-4. Tekan **Deploy** dan tunggu sampai selesai (± 2–4 menit). Bila gagal, buka log build
-   dan lihat bagian *Masalah umum* di [PANDUAN-PERAWATAN.md](PANDUAN-PERAWATAN.md).
+   (Bila Anda memakai cara alternatif di Langkah 3, tambahkan juga `DATABASE_URL` dan `DIRECT_URL`.)
 
-> Alternatif: database Neon bisa juga dibuat dari menu **Storage** di proyek Vercel
-> (pilih Neon, wilayah Singapore). Vercel lalu mengisi `DATABASE_URL` dan
-> `DATABASE_URL_UNPOOLED` otomatis; aplikasi mengenali keduanya. Tinggal tambahkan
-> `SESI_RAHASIA`.
+4. Tekan **Deploy** (atau **Redeploy** bila deployment pertama sudah gagal; perubahan variabel
+   baru berlaku untuk deployment berikutnya) dan tunggu sampai selesai (± 2–4 menit). Bila gagal, buka log build
+   dan lihat bagian *Masalah umum* di [PANDUAN-PERAWATAN.md](PANDUAN-PERAWATAN.md).
 
 ## Langkah 6. Buat akun admin di database Neon
 
@@ -99,10 +105,14 @@ Akun admin dibuat dari komputer Anda, langsung ke database Neon. Buka **terminal
 di folder proyek (PowerShell), lalu jalankan baris demi baris (ganti isinya):
 
 ```powershell
-$env:DATABASE_URL = "alamat LANGSUNG dari Neon (tanpa -pooler)"
+$env:DATABASE_URL = "alamat LANGSUNG (DATABASE_URL_UNPOOLED di Vercel, atau DIRECT_URL)"
 $env:ADMIN_SANDI_AWAL = "sandi awal, minimal 10 karakter"
 npm run admin -- buat
 ```
+
+Cara melihat nilai alamat langsung: Vercel → Settings → Environment Variables →
+`DATABASE_URL_UNPOOLED` → ikon mata (*Show*). Salin langsung ke terminal; jangan dikirim lewat
+chat atau email.
 
 Tutup terminal itu setelah selesai (isian `$env:` hilang saat terminal ditutup).
 
