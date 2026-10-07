@@ -1,0 +1,4 @@
+# Akhir baris seragam (LF) di semua sistem operasi.
+* text=auto eol=lf
+*.png binary
+*.ico binary

@@ -1,0 +1,61 @@
+{
+  "name": "kds4-tb",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "prisma generate",
+    "db:lokal": "prisma dev --name kds4-tb --detach",
+    "db:migrasi": "prisma migrate dev",
+    "db:terapkan": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "uji:excel": "vitest run tests/cocok-excel.test.ts --reporter=verbose",
+    "uji:db": "cross-env KDS4_UJI_DB=1 vitest run tests/db-cocok.test.ts --reporter=verbose",
+    "impor": "tsx scripts/impor.ts",
+    "admin": "tsx scripts/admin.ts",
+    "cadangan": "tsx scripts/cadangan.ts",
+    "pulihkan": "tsx scripts/pulihkan.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
+    "@vercel/functions": "^3.9.11",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "exceljs": "^4.4.0",
+    "lucide-react": "^1.52.0",
+    "next": "16.4.0",
+    "pdfmake": "^0.3.11",
+    "pg": "^8.23.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^22.20.5",
+    "@types/pdfmake": "^0.3.3",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.6",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.0",
+    "prisma": "^7.10.0",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.0.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

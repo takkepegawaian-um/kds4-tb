@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+/*
+  Palet KDS4
+  - Hijau tua  #183630 : warna utama (sidebar, tombol utama)
+  - Krem       #E3DAC9 : latar lembut, garis
+  - Emas       #E5C690 : aksen (menu aktif, sorotan)
+  Warna level mengikuti Excel: Kritis merah, Waspada kuning, Perhatian biru, Aman hijau.
+*/
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-hijau-950: #10251f;
+  --color-hijau-900: #183630;
+  --color-hijau-800: #224940;
+  --color-hijau-700: #2d5c51;
+  --color-krem-50: #faf8f4;
+  --color-krem-100: #f3efe7;
+  --color-krem-200: #e3dac9;
+  --color-krem-300: #d3c6ad;
+  --color-emas-300: #efdcb6;
+  --color-emas-400: #e5c690;
+  --color-emas-600: #b8924f;
+
+  --color-kritis-bg: #ffc7ce;
+  --color-kritis-fg: #9c0006;
+  --color-waspada-bg: #ffeb9c;
+  --color-waspada-fg: #7f5a00;
+  --color-perhatian-bg: #ddebf7;
+  --color-perhatian-fg: #1f4e79;
+  --color-aman-bg: #c6efce;
+  --color-aman-fg: #006100;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-krem-50);
+  color: #1d2422;
+}

@@ -1,0 +1,220 @@
+// Skema database KDS4 — Monitor Tugas Belajar.
+//
+// Prinsip:
+// - Hanya kolom INPUT dari sheet "Data TB" yang disimpan. Kolom hasil hitung
+//   (Akhir efektif, Sisa hari, Tahap, Kode, Skor, Level, Peringkat, Cek data, dst.)
+//   dihitung ulang oleh mesin aturan setiap kali dibutuhkan.
+// - Semua angka aturan (parameter, skor, saran, pemetaan Status SK, daftar pilihan,
+//   hari libur) disimpan di tabel pengaturan supaya bisa diubah admin dari layar.
+// - Tanggal disimpan sebagai tanggal saja (tanpa jam) agar tidak bergeser karena zona waktu.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Pengguna dan sesi login
+// ---------------------------------------------------------------------------
+
+enum Peran {
+  ADMIN // boleh semua
+  PENGAMAT // hanya lihat (disiapkan untuk nanti, belum dipakai)
+}
+
+model Pengguna {
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
+  nama           String
+  hashSandi      String
+  peran          Peran     @default(ADMIN)
+  aktif          Boolean   @default(true)
+  gagalLogin     Int       @default(0)
+  terkunciSampai DateTime?
+  loginTerakhir  DateTime?
+  dibuatPada     DateTime  @default(now())
+  diubahPada     DateTime  @updatedAt
+
+  sesi Sesi[]
+}
+
+// Sesi disimpan di database supaya bisa dicabut (logout paksa).
+// Cookie berisi token acak; yang disimpan di sini hanya hash-nya.
+model Sesi {
+  id          String   @id // hash SHA-256 dari token di cookie
+  penggunaId  Int
+  pengguna    Pengguna @relation(fields: [penggunaId], references: [id], onDelete: Cascade)
+  kedaluwarsa DateTime
+  dibuatPada  DateTime @default(now())
+  ip          String?
+  userAgent   String?
+
+  @@index([penggunaId])
+}
+
+// ---------------------------------------------------------------------------
+// Data Tugas Belajar (satu baris = satu orang, sama dengan sheet "Data TB")
+// ---------------------------------------------------------------------------
+
+model PegawaiTB {
+  id                Int       @id @default(autoincrement())
+  // Urutan baris. Dipakai untuk memecah peringkat bila skor sama
+  // (Excel: baris yang lebih atas mendapat peringkat lebih kecil).
+  urutan            Int
+  no                Int? // kolom "No" dari Excel (hanya tampilan)
+  nama              String
+  nip               String
+  statusAkhir       String // Sedang TB / Sudah PK / Expired / Lulus / Rencana studi
+  fakultas          String?
+  departemen        String?
+  jabatan           String?
+  jenjang           String?
+  jenisPelaksanaan  String? // Bebas / Tetap (TriDharma)
+  lokasi            String? // DN / LN
+  sumberBiaya       String?
+  tempatStudi       String?
+  tmtTb             DateTime? @db.Date
+  masaStudiSd       DateTime? @db.Date
+  perpanjanganSd    DateTime? @db.Date
+  statusSk          String?
+  kondisiKuliah     String?
+  noSk              String? // No SK / No usul
+  linkSk            String?
+  presensi          String? // Presensi di sistem: AKTIF / NON AKTIF / MISTERY??
+  presensiTbSd      DateTime? @db.Date // Presensi ditandai TB s.d.
+  catatan           String?
+  tanggalMasukTahap DateTime? @db.Date
+
+  dibuatPada   DateTime  @default(now())
+  diubahPada   DateTime  @updatedAt
+  dibuatOleh   String? // email pengguna
+  diubahOleh   String? // email pengguna
+  dihapusPada  DateTime? // hapus lunak: data tetap ada untuk riwayat
+  dihapusOleh  String?
+
+  @@index([nip])
+  @@index([statusAkhir])
+  @@index([urutan])
+  @@index([dihapusPada])
+}
+
+// ---------------------------------------------------------------------------
+// Pengaturan (pengganti sheet "Pengaturan")
+// ---------------------------------------------------------------------------
+
+// Parameter tunggal, misalnya toleransi 6 bulan, ambang 90 hari, pengurang skor 40.
+model Parameter {
+  kunci      String  @id
+  nilai      String // disimpan sebagai teks, dibaca sesuai "tipe"
+  tipe       String // "angka" | "tanggal" | "teks"
+  label      String
+  keterangan String?
+  urutan     Int
+}
+
+model HariLibur {
+  tanggal    DateTime @id @db.Date
+  keterangan String?
+}
+
+// Daftar pilihan untuk dropdown (fakultas, status akhir, jenis, lokasi, dst.).
+// Nilai bertanda "sistem" dipakai langsung oleh aturan hambatan sehingga
+// tidak boleh diganti nama atau dihapus dari layar Pengaturan.
+model PilihanNilai {
+  id       Int     @id @default(autoincrement())
+  kategori String
+  nilai    String
+  urutan   Int
+  aktif    Boolean @default(true)
+  sistem   Boolean @default(false)
+
+  @@unique([kategori, nilai])
+}
+
+// Pemetaan Status SK -> Tahap, Pihak penahan bawaan, SK sudah terbit?
+model PemetaanStatusSk {
+  statusSk     String @id
+  tahap        String
+  pihakPenahan String
+  skTerbit     String // "Ya" atau "Belum"
+  urutan       Int
+}
+
+// Tabel aturan hambatan: kode 0..12, skor dasar, saran tindakan.
+// Syarat logika tiap kode ada di kode program (mesin aturan) dan dilengkapi tes.
+model AturanHambatan {
+  kode      Int     @id
+  nama      String
+  skorDasar Int
+  saran     String
+  aktif     Boolean @default(true)
+}
+
+// Rekap resmi TB dan TB Biaya Mandiri per fakultas (angka diketik manual).
+model RekapResmiFakultas {
+  fakultas     String @id
+  tugasBelajar Int    @default(0)
+  biayaMandiri Int    @default(0)
+}
+
+// Rekap penerbitan SK Tugas Belajar (angka diketik manual).
+model RekapPenerbitanSk {
+  id       Int     @id @default(autoincrement())
+  urutan   Int
+  uraian   String
+  jumlah   Int     @default(0)
+  // Baris dijumlahkan ke "Total SK yang sudah terbit" atau "belum terbit".
+  kelompok String? // "SUDAH_TERBIT" | "BELUM_TERBIT" | null
+}
+
+// ---------------------------------------------------------------------------
+// Log
+// ---------------------------------------------------------------------------
+
+// Riwayat perubahan: siapa mengubah apa, nilai lama dan baru, kapan.
+model LogPerubahan {
+  id         Int      @id @default(autoincrement())
+  waktu      DateTime @default(now())
+  email      String // pengguna yang mengubah
+  entitas    String // mis. "PegawaiTB", "Parameter", "AturanHambatan"
+  entitasId  String
+  aksi       String // TAMBAH | UBAH | HAPUS | PULIHKAN | IMPOR
+  kolom      String?
+  nilaiLama  String?
+  nilaiBaru  String?
+  imporId    Int?
+
+  @@index([entitas, entitasId])
+  @@index([waktu])
+}
+
+// Log akses: login berhasil/gagal, logout, ekspor data.
+model LogAkses {
+  id         Int      @id @default(autoincrement())
+  waktu      DateTime @default(now())
+  email      String
+  peristiwa  String // LOGIN_BERHASIL | LOGIN_GAGAL | LOGOUT | EKSPOR | ...
+  ip         String?
+  userAgent  String?
+  keterangan String?
+
+  @@index([waktu])
+  @@index([email])
+}
+
+model RiwayatImpor {
+  id         Int      @id @default(autoincrement())
+  waktu      DateTime @default(now())
+  email      String
+  namaBerkas String
+  jumlahBaris Int
+  ditambah   Int
+  diubah     Int
+  dilewati   Int
+  gagal      Int
+  laporan    Json // rincian baris gagal / kembar
+}
