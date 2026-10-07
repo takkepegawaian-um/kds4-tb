@@ -3,5 +3,5 @@
   "regions": [
     "sin1"
   ],
-  "buildCommand": "npm run db:terapkan && npm run db:seed && npm run build"
+  "buildCommand": "node scripts/periksa-env.mjs && npm run db:terapkan && npm run db:seed && npm run build"
 }
