@@ -50,7 +50,7 @@ export function KerangkaAplikasi({
           <Image src="/logo.png" alt="Logo KDS4" width={36} height={42} priority style={{ width: 36, height: "auto" }} />
           <div className="leading-tight">
             <div className="text-lg font-bold tracking-wide text-white">KDS4</div>
-            <div className="text-xs text-krem-200/80">Monitor Tugas Belajar</div>
+            <div className="text-xs text-krem-200/80">Monitor TB</div>
           </div>
           <button
             className="ml-auto rounded-md p-2 text-krem-200 hover:bg-hijau-800 lg:hidden"

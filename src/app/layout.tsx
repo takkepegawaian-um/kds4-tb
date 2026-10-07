@@ -9,8 +9,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "KDS4 — Monitor Tugas Belajar",
-    template: "%s · KDS4",
+    default: "KDS4 — Monitor TB",
+    template: "%s · KDS4 — Monitor TB",
   },
   description: "Pemantauan pegawai Tugas Belajar dan hambatan administrasinya.",
   robots: { index: false, follow: false },

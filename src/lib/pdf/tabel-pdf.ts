@@ -53,7 +53,7 @@ export async function buatPdfTabel<T>(opsi: {
     pageOrientation: "landscape",
     pageMargins: [20, 24, 20, 30],
     defaultStyle: { font: "Helvetica", fontSize: 7, lineHeight: 1.05 },
-    info: { title: opsi.judul, creator: "KDS4 — Monitor Tugas Belajar" },
+    info: { title: opsi.judul, creator: "KDS4 — Monitor TB" },
     content: [
       { text: opsi.judul, fontSize: 14, bold: true, color: "#183630" },
       ...opsi.subjudul.map((t): Content => ({ text: t, color: "#555555", margin: [0, 2, 0, 0] })),
@@ -75,7 +75,7 @@ export async function buatPdfTabel<T>(opsi: {
     ],
     footer: (halaman: number, jumlah: number) => ({
       columns: [
-        { text: "KDS4 — Monitor Tugas Belajar", color: "#888888" },
+        { text: "KDS4 — Monitor TB", color: "#888888" },
         { text: `Halaman ${halaman} dari ${jumlah}`, alignment: "right", color: "#888888" },
       ],
       margin: [24, 8, 24, 0],

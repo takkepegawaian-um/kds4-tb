@@ -33,7 +33,7 @@ export async function buatBerkasExcel<T>(opsi: {
   bekukanKolom?: number;
 }): Promise<Buffer> {
   const wb = new ExcelJS.Workbook();
-  wb.creator = "KDS4 — Monitor Tugas Belajar";
+  wb.creator = "KDS4 — Monitor TB";
   wb.created = new Date();
   const ws = wb.addWorksheet(opsi.namaSheet, {
     views: [{ state: "frozen", xSplit: opsi.bekukanKolom ?? 0, ySplit: 3 }],
