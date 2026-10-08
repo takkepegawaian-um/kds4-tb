@@ -5,7 +5,7 @@
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { connection } from "next/server";
-import { AlertOctagon, AlertTriangle, CheckCircle2, Info, Users, X } from "lucide-react";
+import { AlertOctagon, AlertTriangle, CheckCircle2, ChevronDown, Info, Users, X } from "lucide-react";
 import clsx from "clsx";
 import { GrafikBatang } from "@/components/grafik-batang";
 import { JudulHalaman, JudulKartu, Kartu, MemuatData } from "@/components/ui";
@@ -98,7 +98,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
   const th = "px-3 py-2 text-left text-xs font-semibold tracking-[0.06em] text-gray-500 uppercase";
   const thK = `${th} text-right`;
-  const td = "px-3 py-2.5 text-[15px]";
+  const td = "px-3 py-2 text-[14px]";
   const tdK = `${td} text-right tabular-nums`;
 
   const ikonLevel: Record<Level, ReactNode> = {
@@ -107,6 +107,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
     Perhatian: <Info size={18} />,
     Aman: <CheckCircle2 size={18} />,
   };
+  const adaDataTertahan = r.tahap.some((t) => t.rataRataTertahan !== null);
   const gayaLevel: Record<Level, string> = {
     Kritis: "border-l-kritis-fg bg-kritis-bg/25 text-kritis-fg",
     Waspada: "border-l-waspada-fg bg-waspada-bg/30 text-waspada-fg",
@@ -114,80 +115,172 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
     Aman: "border-l-aman-fg bg-aman-bg/30 text-aman-fg",
   };
 
+  const filterAktif = !!(acuan || filter.fakultas || filter.jenis);
+  const sel = "h-10 w-full rounded-lg border border-krem-300 bg-white px-3 text-sm";
+  const lbl = "mb-1 block text-xs font-medium text-gray-600";
+
   return (
-    <div className="grid gap-6">
-      {/* Filter global */}
-      <Kartu className="p-4 sm:p-5">
+    <div className="grid gap-4">
+      {/* Filter global (satu baris) */}
+      <Kartu className="p-3 sm:p-4">
         <form action="/" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_auto] lg:items-end">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Fakultas</label>
-            <select name="fakultas" defaultValue={filter.fakultas ?? ""} className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]">
+            <label className={lbl}>Fakultas</label>
+            <select name="fakultas" defaultValue={filter.fakultas ?? ""} className={sel}>
               <option value="">Semua fakultas</option>
               {daftar.FAKULTAS.map((f) => <option key={f}>{f}</option>)}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Jenis pelaksanaan</label>
-            <select name="jenis" defaultValue={filter.jenis ?? ""} className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]">
+            <label className={lbl}>Jenis pelaksanaan</label>
+            <select name="jenis" defaultValue={filter.jenis ?? ""} className={sel}>
               <option value="">Bebas dan Tetap</option>
               {daftar.JENIS_PELAKSANAAN.map((f) => <option key={f}>{f}</option>)}
             </select>
           </div>
           <div>
-            <label htmlFor="acuan" className="mb-1 block text-sm font-medium text-gray-700">Tanggal acuan (simulasi)</label>
+            <label htmlFor="acuan" className={lbl}>Tanggal acuan (simulasi)</label>
             <input id="acuan" name="acuan" inputMode="numeric" defaultValue={acuan ? formatTanggal(acuan) : ""}
-              placeholder={`${formatTanggal(tanggalAcuan)} (hari ini)`}
-              className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]" />
+              placeholder={`${formatTanggal(tanggalAcuan)} (hari ini)`} className={sel} />
           </div>
-          <div className="flex gap-3">
-            <button className="h-11 rounded-lg bg-hijau-900 px-5 text-[13px] font-semibold tracking-[0.08em] text-white uppercase hover:bg-hijau-800">Terapkan</button>
-            <Link href="/" className="inline-flex h-11 items-center rounded-lg border border-krem-300 bg-white px-5 text-[13px] font-semibold tracking-[0.08em] text-hijau-900 uppercase">Reset</Link>
+          <div className="flex gap-2">
+            <button className="h-10 rounded-lg bg-hijau-900 px-4 text-[12px] font-semibold tracking-[0.08em] text-white uppercase hover:bg-hijau-800">Terapkan</button>
+            <Link href="/" className="inline-flex h-10 items-center rounded-lg border border-krem-300 bg-white px-4 text-[12px] font-semibold tracking-[0.08em] text-hijau-900 uppercase">Reset</Link>
           </div>
         </form>
-        <p className="mt-3 text-sm text-gray-600">
-          Per tanggal <b>{formatTanggal(tanggalAcuan)}</b>
-          {acuan && (
-            <Link href="/" className="ml-2 inline-flex items-center gap-1 rounded-full bg-emas-400 px-2.5 py-0.5 font-semibold text-hijau-900">
-              simulasi <X size={13} />
-            </Link>
-          )}
-          {(filter.fakultas || filter.jenis) && <> · disaring: {[filter.fakultas, filter.jenis].filter(Boolean).join(", ")}</>}
-          
-        </p>
+        {filterAktif && (
+          <p className="mt-2 text-sm text-gray-600">
+            Per tanggal <b>{formatTanggal(tanggalAcuan)}</b>
+            {acuan && (
+              <Link href="/" className="ml-2 inline-flex items-center gap-1 rounded-full bg-emas-400 px-2.5 py-0.5 font-semibold text-hijau-900">
+                simulasi <X size={13} />
+              </Link>
+            )}
+            {(filter.fakultas || filter.jenis) && <> · disaring: {[filter.fakultas, filter.jenis].filter(Boolean).join(", ")}</>}
+          </p>
+        )}
       </Kartu>
 
-      {/* Kartu ringkasan */}
+      {/* Kartu level */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <div className="col-span-2 rounded-xl border border-krem-200 border-l-4 border-l-hijau-900 bg-white p-4 md:col-span-1">
-          <div className="flex items-center gap-2 text-sm font-semibold text-hijau-900"><Users size={18} /> Sedang TB</div>
-          <div className="mt-1 text-3xl font-bold text-hijau-900 tabular-nums">
+        <div className="col-span-2 rounded-xl border border-krem-200 border-l-4 border-l-hijau-900 bg-white p-3 md:col-span-1">
+          <div className="flex items-center gap-2 text-sm font-semibold text-hijau-900"><Users size={16} /> Sedang TB</div>
+          <div className="mt-0.5 text-3xl font-bold text-hijau-900 tabular-nums">
             <TautanAngka acuan={acuan} a={r.ringkasan.jumlahTb.semua} className="no-underline" />
           </div>
-          <div className="mt-1 text-sm text-gray-600">
+          <div className="text-sm text-gray-600">
             Bebas <TautanAngka acuan={acuan} a={r.ringkasan.jumlahTb.bebas} /> · Tetap <TautanAngka acuan={acuan} a={r.ringkasan.jumlahTb.tetap} />
           </div>
         </div>
         {r.ringkasan.level.map((l) => (
-          <div key={l.level} className={clsx("rounded-xl border border-krem-200 border-l-4 p-4", gayaLevel[l.level])}>
+          <div key={l.level} className={clsx("rounded-xl border border-krem-200 border-l-4 p-3", gayaLevel[l.level])}>
             <div className="flex items-center gap-2 text-sm font-semibold">{ikonLevel[l.level]} {l.level}</div>
-            <div className="mt-1 text-3xl font-bold tabular-nums">
+            <div className="mt-0.5 text-3xl font-bold tabular-nums">
               {l.total === 0 ? <span>0</span> : (
                 <Link href={href(l.semua.saringan)} prefetch={false} className="hover:underline">{l.total}</Link>
               )}
             </div>
-            <div className="mt-1 text-sm text-gray-700">
+            <div className="text-sm text-gray-700">
               Bebas <TautanAngka acuan={acuan} a={l.bebas} /> · Tetap <TautanAngka acuan={acuan} a={l.tetap} />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        {/* Hambatan terdeteksi */}
-        <Kartu className="xl:col-span-2">
-          <JudulKartu>
-            Hambatan yang terdeteksi
-          </JudulKartu>
+      {/* 1-2. Masa TB berakhir | Absensi */}
+      <div className="grid gap-4 xl:grid-cols-2">
+        <Kartu className="p-4">
+          <JudulKartu>Masa TB berakhir</JudulKartu>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-krem-200"><tr><th className={th}>Jangka waktu</th><th className={thK}>Bebas</th><th className={thK}>Tetap</th><th className={thK}>Total</th></tr></thead>
+              <tbody className="divide-y divide-krem-100">
+                {r.masaTb.map((m) => (
+                  <tr key={m.label}>
+                    <td className={`${td} ${m.label === "Sudah lewat" ? "font-semibold text-kritis-fg" : ""}`}>{m.label}</td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={m.bebas} /></td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={m.tetap} /></td>
+                    <td className={`${tdK} font-semibold`}>{m.total}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Kartu>
+
+        <Kartu className="p-4">
+          <JudulKartu>Absensi (Bebas TriDharma)</JudulKartu>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <tbody className="divide-y divide-krem-100">
+                {([
+                  ["Ditandai TB", r.presensi.aktif],
+                  ["Tidak ditandai TB (absen sendiri)", r.presensi.nonAktif],
+                  ["Tanggal ditandai TB terisi", r.presensi.ditandaiTerisi],
+                  ["Penandaan TB habis dalam ambang hari, padahal masa TB lebih panjang", r.presensi.kode5],
+                  ["Masa TB berakhir, absensi masih ditandai TB", r.presensi.kode1],
+                  ["SK TB berlaku, absensi tidak ditandai TB", r.presensi.kode2],
+                ] as const).map(([label, a]) => (
+                  <tr key={label}>
+                    <td className={td}>{label}</td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={a} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Kartu>
+      </div>
+
+      {/* 3. Per fakultas */}
+      <Kartu className="p-4">
+        <JudulKartu>Per fakultas</JudulKartu>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-krem-200">
+                <tr><th className={th}>Fakultas</th><th className={thK}>Total</th><th className={thK}>Bebas</th><th className={thK}>Kritis</th><th className={thK}>Waspada</th><th className={thK}>Perhatian</th><th className={thK}>Arsip</th></tr>
+              </thead>
+              <tbody className="divide-y divide-krem-100">
+                {r.fakultas.baris.filter((f) => !f.fakultas.startsWith("(") || f.total.jumlah > 0).map((f) => (
+                  <tr key={f.fakultas}>
+                    <td className={`${td} ${f.fakultas.startsWith("(") ? "text-sm text-gray-500 italic" : ""}`}>{f.fakultas.startsWith("(") ? "Kosong / lainnya" : f.fakultas}</td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={f.total} /></td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={f.bebas} /></td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={f.kritis} /></td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={f.waspada} /></td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={f.perhatian} /></td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={f.arsip} /></td>
+                  </tr>
+                ))}
+                <tr className="font-semibold">
+                  <td className={td}>Jumlah</td>
+                  {(["total", "bebas", "kritis", "waspada", "perhatian", "arsip"] as const).map((k) => (
+                    <td key={k} className={tdK}>{r.fakultas.jumlah[k]}</td>
+                  ))}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <GrafikBatang
+            judul="Fakultas"
+            seri={(Object.keys(WARNA_LEVEL) as (keyof typeof WARNA_LEVEL)[]).map((l) => ({ nama: l, warna: WARNA_LEVEL[l] }))}
+            baris={r.fakultas.baris.filter((f) => !f.fakultas.startsWith("(")).map((f) => ({
+              label: f.fakultas,
+              segmen: [
+                { seri: "Kritis", nilai: f.kritis.jumlah, href: href(f.kritis.saringan) },
+                { seri: "Waspada", nilai: f.waspada.jumlah, href: href(f.waspada.saringan) },
+                { seri: "Perhatian", nilai: f.perhatian.jumlah, href: href(f.perhatian.saringan) },
+              ],
+            }))}
+          />
+        </div>
+      </Kartu>
+
+      {/* 4. Hambatan (grafik) | status akhir, pihak penahan, tahap */}
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <Kartu className="p-4">
+          <JudulKartu>Hambatan yang terdeteksi</JudulKartu>
           <GrafikBatang
             judul="Hambatan"
             seri={[{ nama: "Bebas", warna: WARNA_BEBAS }, { nama: "Tetap", warna: WARNA_TETAP }]}
@@ -199,219 +292,140 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
           />
         </Kartu>
 
-        {/* Posisi per status akhir */}
-        <Kartu>
-          <JudulKartu>Posisi per status akhir</JudulKartu>
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b border-krem-200"><tr><th className={th}>Status akhir</th><th className={thK}>Jumlah</th><th className={thK}>%</th></tr></thead>
-            <tbody className="divide-y divide-krem-100">
-              {r.statusAkhir.baris.map((s) => (
-                <tr key={s.status}>
-                  <td className={td}>{s.status}</td>
-                  <td className={tdK}><TautanAngka acuan={acuan} a={s.jumlah} /></td>
-                  <td className={`${tdK} text-gray-600`}>{(s.persen * 100).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%</td>
-                </tr>
-              ))}
-              <tr className="font-semibold">
-                <td className={td}>Total</td>
-                <td className={tdK}>{r.statusAkhir.total}</td>
-                <td className={tdK}>100%</td>
-                <td className={`${td} text-sm text-kritis-fg`}>{!r.statusAkhir.cocok && "Ada status kosong / tidak dikenal"}</td>
-              </tr>
-            </tbody>
-          </table>
-          </div>
-        </Kartu>
-
-        {/* Siapa yang menahan */}
-        <Kartu>
-          <JudulKartu>Siapa yang menahan</JudulKartu>
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b border-krem-200"><tr><th className={th}>Pihak penahan</th><th className={thK}>Bebas</th><th className={thK}>Tetap</th><th className={thK}>Total</th></tr></thead>
-            <tbody className="divide-y divide-krem-100">
-              {r.penahan.filter((x) => x.pihak !== "Lainnya" || x.total > 0).map((x) => (
-                <tr key={x.pihak}>
-                  <td className={td}>{x.pihak}</td>
-                  <td className={tdK}><TautanAngka acuan={acuan} a={x.bebas} /></td>
-                  <td className={tdK}><TautanAngka acuan={acuan} a={x.tetap} /></td>
-                  <td className={`${tdK} font-semibold`}>{x.total}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </Kartu>
-
-        {/* Posisi per tahap */}
-        <Kartu className="xl:col-span-2">
-          <JudulKartu>Posisi per tahap</JudulKartu>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-krem-200"><tr><th className={th}>Tahap</th><th className={thK}>Jumlah</th><th className={thK}>Rata-rata hari tertahan</th><th className={thK}>Terlama (hari)</th><th className={thK}>Kritis atau Waspada</th></tr></thead>
-              <tbody className="divide-y divide-krem-100">
-                {r.tahap.map((t) => (
-                  <tr key={t.tahap}>
-                    <td className={td}>{t.tahap}</td>
-                    <td className={tdK}><TautanAngka acuan={acuan} a={t.jumlah} /></td>
-                    <td className={`${tdK} text-gray-600`}>{t.rataRataTertahan === null ? "belum ada data" : t.rataRataTertahan.toLocaleString("id-ID", { maximumFractionDigits: 1 })}</td>
-                    <td className={`${tdK} text-gray-600`}>{t.terlama ?? "–"}</td>
-                    <td className={tdK}><TautanAngka acuan={acuan} a={t.kritisWaspada} /></td>
+        <div className="grid gap-4">
+          <Kartu className="p-4">
+            <JudulKartu>Posisi per status akhir</JudulKartu>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-krem-200"><tr><th className={th}>Status akhir</th><th className={thK}>Jumlah</th><th className={thK}>%</th></tr></thead>
+                <tbody className="divide-y divide-krem-100">
+                  {r.statusAkhir.baris.map((s) => (
+                    <tr key={s.status}>
+                      <td className={td}>{s.status}</td>
+                      <td className={tdK}><TautanAngka acuan={acuan} a={s.jumlah} /></td>
+                      <td className={`${tdK} text-gray-600`}>{(s.persen * 100).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%</td>
+                    </tr>
+                  ))}
+                  <tr className="font-semibold">
+                    <td className={td}>Total</td>
+                    <td className={tdK}>{r.statusAkhir.total}</td>
+                    <td className={tdK}>100%</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Kartu>
+                </tbody>
+              </table>
+              {!r.statusAkhir.cocok && <p className="mt-2 text-sm text-kritis-fg">Ada status kosong / tidak dikenal</p>}
+            </div>
+          </Kartu>
 
-        {/* Per fakultas */}
-        <Kartu className="xl:col-span-2">
-          <JudulKartu>Per fakultas</JudulKartu>
-          <div className="grid gap-6 lg:grid-cols-2">
+          <Kartu className="p-4">
+            <JudulKartu>Siapa yang menahan</JudulKartu>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-krem-200"><tr><th className={th}>Pihak penahan</th><th className={thK}>Bebas</th><th className={thK}>Tetap</th><th className={thK}>Total</th></tr></thead>
+                <tbody className="divide-y divide-krem-100">
+                  {r.penahan.filter((x) => x.pihak !== "Lainnya" || x.total > 0).map((x) => (
+                    <tr key={x.pihak}>
+                      <td className={td}>{x.pihak}</td>
+                      <td className={tdK}><TautanAngka acuan={acuan} a={x.bebas} /></td>
+                      <td className={tdK}><TautanAngka acuan={acuan} a={x.tetap} /></td>
+                      <td className={`${tdK} font-semibold`}>{x.total}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Kartu>
+
+          <Kartu className="p-4">
+            <JudulKartu>Posisi per tahap</JudulKartu>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="border-b border-krem-200">
-                  <tr><th className={th}>Fakultas</th><th className={thK}>Total</th><th className={thK}>Bebas</th><th className={thK}>Kritis</th><th className={thK}>Waspada</th><th className={thK}>Perhatian</th><th className={thK}>Arsip</th></tr>
+                  <tr>
+                    <th className={th}>Tahap</th>
+                    <th className={thK}>Jumlah</th>
+                    {adaDataTertahan && <th className={thK}>Rata-rata tertahan</th>}
+                    {adaDataTertahan && <th className={thK}>Terlama</th>}
+                    <th className={thK}>Kritis / Waspada</th>
+                  </tr>
                 </thead>
                 <tbody className="divide-y divide-krem-100">
-                  {r.fakultas.baris.filter((f) => !f.fakultas.startsWith("(") || f.total.jumlah > 0).map((f) => (
-                    <tr key={f.fakultas}>
-                      <td className={`${td} ${f.fakultas.startsWith("(") ? "text-sm text-gray-500 italic" : ""}`}>{f.fakultas.startsWith("(") ? "Kosong / lainnya" : f.fakultas}</td>
-                      <td className={tdK}><TautanAngka acuan={acuan} a={f.total} /></td>
-                      <td className={tdK}><TautanAngka acuan={acuan} a={f.bebas} /></td>
-                      <td className={tdK}><TautanAngka acuan={acuan} a={f.kritis} /></td>
-                      <td className={tdK}><TautanAngka acuan={acuan} a={f.waspada} /></td>
-                      <td className={tdK}><TautanAngka acuan={acuan} a={f.perhatian} /></td>
-                      <td className={tdK}><TautanAngka acuan={acuan} a={f.arsip} /></td>
+                  {r.tahap.map((t) => (
+                    <tr key={t.tahap}>
+                      <td className={td}>{t.tahap}</td>
+                      <td className={tdK}><TautanAngka acuan={acuan} a={t.jumlah} /></td>
+                      {adaDataTertahan && <td className={`${tdK} text-gray-600`}>{t.rataRataTertahan === null ? "–" : t.rataRataTertahan.toLocaleString("id-ID", { maximumFractionDigits: 1 })}</td>}
+                      {adaDataTertahan && <td className={`${tdK} text-gray-600`}>{t.terlama ?? "–"}</td>}
+                      <td className={tdK}><TautanAngka acuan={acuan} a={t.kritisWaspada} /></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Kartu>
+        </div>
+      </div>
+
+      {/* 5. Rekap manual (dilipat) */}
+      <details className="group rounded-xl border border-krem-200 bg-white">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-[15px] font-semibold text-hijau-900">
+          <span>Rekap manual: resmi TB dan penerbitan SK</span>
+          <ChevronDown size={18} className="transition-transform group-open:rotate-180" />
+        </summary>
+        <div className="grid gap-6 border-t border-krem-100 p-4 xl:grid-cols-2">
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-hijau-900">Rekap resmi TB dan TB Biaya Mandiri (per {formatTanggal(tanggalRekap?.nilai)})</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="border-b border-krem-200"><tr><th className={th}>Fakultas</th><th className={thK}>TB</th><th className={thK}>TB Biaya Mandiri</th><th className={thK}>Jumlah rekap</th><th className={thK}>Sedang TB</th><th className={thK}>Selisih</th></tr></thead>
+                <tbody className="divide-y divide-krem-100">
+                  {rekap.baris.map((x) => (
+                    <tr key={x.fakultas}>
+                      <td className={td}>{x.fakultas}</td>
+                      <td className={tdK}>{x.tugasBelajar}</td>
+                      <td className={tdK}>{x.biayaMandiri}</td>
+                      <td className={tdK}>{x.jumlahRekap}</td>
+                      <td className={tdK}><TautanAngka acuan={acuan} a={x.sedangTb} /></td>
+                      <td className={`${tdK} ${x.selisih < 0 ? "text-kritis-fg" : ""}`}>{x.selisih}</td>
                     </tr>
                   ))}
                   <tr className="font-semibold">
                     <td className={td}>Jumlah</td>
-                    {(["total", "bebas", "kritis", "waspada", "perhatian", "arsip"] as const).map((k) => (
-                      <td key={k} className={tdK}>{r.fakultas.jumlah[k]}</td>
-                    ))}
+                    <td className={tdK}>{rekap.jumlah.tugasBelajar}</td>
+                    <td className={tdK}>{rekap.jumlah.biayaMandiri}</td>
+                    <td className={tdK}>{rekap.jumlah.jumlahRekap}</td>
+                    <td className={tdK}>{rekap.jumlah.sedangTb}</td>
+                    <td className={tdK}>{rekap.jumlah.selisih}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <GrafikBatang
-              judul="Fakultas"
-              seri={(Object.keys(WARNA_LEVEL) as (keyof typeof WARNA_LEVEL)[]).map((l) => ({ nama: l, warna: WARNA_LEVEL[l] }))}
-              baris={r.fakultas.baris.filter((f) => !f.fakultas.startsWith("(")).map((f) => ({
-                label: f.fakultas,
-                segmen: [
-                  { seri: "Kritis", nilai: f.kritis.jumlah, href: href(f.kritis.saringan) },
-                  { seri: "Waspada", nilai: f.waspada.jumlah, href: href(f.waspada.saringan) },
-                  { seri: "Perhatian", nilai: f.perhatian.jumlah, href: href(f.perhatian.saringan) },
-                ],
-              }))}
-            />
           </div>
-        </Kartu>
-
-        {/* Masa TB berakhir */}
-        <Kartu>
-          <JudulKartu>Masa TB berakhir</JudulKartu>
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="border-b border-krem-200"><tr><th className={th}>Jangka waktu</th><th className={thK}>Bebas</th><th className={thK}>Tetap</th><th className={thK}>Total</th></tr></thead>
-            <tbody className="divide-y divide-krem-100">
-              {r.masaTb.map((m) => (
-                <tr key={m.label}>
-                  <td className={`${td} ${m.label === "Sudah lewat" ? "font-semibold text-kritis-fg" : ""}`}>{m.label}</td>
-                  <td className={tdK}><TautanAngka acuan={acuan} a={m.bebas} /></td>
-                  <td className={tdK}><TautanAngka acuan={acuan} a={m.tetap} /></td>
-                  <td className={`${tdK} font-semibold`}>{m.total}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </Kartu>
-
-        {/* Absensi */}
-        <Kartu>
-          <JudulKartu>Absensi (Bebas TriDharma)</JudulKartu>
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <tbody className="divide-y divide-krem-100">
-              {([
-                ["Ditandai TB", r.presensi.aktif],
-                ["Tidak ditandai TB (absen sendiri)", r.presensi.nonAktif],
-                ["Tanggal ditandai TB terisi", r.presensi.ditandaiTerisi],
-                ["Penandaan TB habis dalam ambang hari, padahal masa TB lebih panjang", r.presensi.kode5],
-                ["Masa TB berakhir, absensi masih ditandai TB", r.presensi.kode1],
-                ["SK TB berlaku, absensi tidak ditandai TB", r.presensi.kode2],
-              ] as const).map(([label, a]) => (
-                <tr key={label}>
-                  <td className={td}>{label}</td>
-                  <td className={tdK}><TautanAngka acuan={acuan} a={a} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          </div>
-        </Kartu>
-
-        {/* Rekap resmi (manual) */}
-        <Kartu>
-          <JudulKartu keterangan={`Per ${formatTanggal(tanggalRekap?.nilai)}`}>
-            Rekap resmi TB dan TB Biaya Mandiri
-          </JudulKartu>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="border-b border-krem-200"><tr><th className={th}>Fakultas</th><th className={thK}>TB</th><th className={thK}>TB Biaya Mandiri</th><th className={thK}>Jumlah rekap</th><th className={thK}>Sedang TB di Data TB</th><th className={thK}>Selisih</th></tr></thead>
-              <tbody className="divide-y divide-krem-100">
-                {rekap.baris.map((x) => (
-                  <tr key={x.fakultas}>
-                    <td className={td}>{x.fakultas}</td>
-                    <td className={tdK}>{x.tugasBelajar}</td>
-                    <td className={tdK}>{x.biayaMandiri}</td>
-                    <td className={tdK}>{x.jumlahRekap}</td>
-                    <td className={tdK}><TautanAngka acuan={acuan} a={x.sedangTb} /></td>
-                    <td className={`${tdK} ${x.selisih < 0 ? "text-kritis-fg" : ""}`}>{x.selisih}</td>
+          <div>
+            <h3 className="mb-2 text-sm font-semibold text-hijau-900">Rekap penerbitan SK Tugas Belajar</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <tbody className="divide-y divide-krem-100">
+                  {rekapSk.map((x) => (
+                    <tr key={x.id}>
+                      <td className={`${td} text-sm`}>{x.uraian}</td>
+                      <td className={tdK}>{x.jumlah}</td>
+                    </tr>
+                  ))}
+                  <tr className="font-semibold">
+                    <td className={td}>Total SK yang sudah terbit</td>
+                    <td className={tdK}>{rekapSk.filter((x) => x.kelompok === "SUDAH_TERBIT").reduce((t, x) => t + x.jumlah, 0)}</td>
                   </tr>
-                ))}
-                <tr className="font-semibold">
-                  <td className={td}>Jumlah</td>
-                  <td className={tdK}>{rekap.jumlah.tugasBelajar}</td>
-                  <td className={tdK}>{rekap.jumlah.biayaMandiri}</td>
-                  <td className={tdK}>{rekap.jumlah.jumlahRekap}</td>
-                  <td className={tdK}>{rekap.jumlah.sedangTb}</td>
-                  <td className={tdK}>{rekap.jumlah.selisih}</td>
-                </tr>
-              </tbody>
-            </table>
+                  <tr className="font-semibold">
+                    <td className={td}>Total SK yang belum terbit</td>
+                    <td className={tdK}>{rekapSk.filter((x) => x.kelompok === "BELUM_TERBIT").reduce((t, x) => t + x.jumlah, 0)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </Kartu>
-
-        {/* Rekap penerbitan SK (manual) */}
-        <Kartu>
-          <JudulKartu>Rekap penerbitan SK Tugas Belajar</JudulKartu>
-          <div className="overflow-x-auto">
-          <table className="w-full">
-            <tbody className="divide-y divide-krem-100">
-              {rekapSk.map((x) => (
-                <tr key={x.id}>
-                  <td className={`${td} text-sm`}>{x.uraian}</td>
-                  <td className={tdK}>{x.jumlah}</td>
-                </tr>
-              ))}
-              <tr className="font-semibold">
-                <td className={td}>Total SK yang sudah terbit</td>
-                <td className={tdK}>{rekapSk.filter((x) => x.kelompok === "SUDAH_TERBIT").reduce((t, x) => t + x.jumlah, 0)}</td>
-              </tr>
-              <tr className="font-semibold">
-                <td className={td}>Total SK yang belum terbit</td>
-                <td className={tdK}>{rekapSk.filter((x) => x.kelompok === "BELUM_TERBIT").reduce((t, x) => t + x.jumlah, 0)}</td>
-              </tr>
-            </tbody>
-          </table>
-          </div>
-        </Kartu>
-      </div>
-
+        </div>
+      </details>
     </div>
   );
 }
