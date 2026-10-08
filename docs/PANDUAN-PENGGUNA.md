@@ -57,6 +57,19 @@ Ambang hari, skor, batas level, Status SK, daftar pilihan, hari libur, dan rekap
 Setelah menyimpan, aplikasi menunjukkan dampaknya (mis. "Waspada 91 → 112"). Bila ragu, tekan
 **Kembalikan ke bawaan Excel**. Semua perubahan tercatat di Log Aktivitas.
 
+## Status absensi (khusus Bebas TriDharma)
+
+Pegawai Bebas TriDharma tidak absen selama TB, karena absensinya **ditandai TB oleh Admin**.
+
+| Tulisan di layar | Artinya |
+|---|---|
+| **Ditandai TB** | Absensi pegawai ditandai TB (bebas absen). Ini keadaan normal selama TB berjalan. |
+| **Tidak ditandai TB (absen sendiri)** | Tidak ada tanda TB, jadi pegawai harus absen sendiri. Bila SK TB masih berlaku, tunjangan dan kinerja bisa terpotong. |
+
+Tanggal "Ditandai TB s.d." menunjukkan sampai kapan penandaan berlaku. Setelah masa TB berakhir,
+tanda TB harus dicabut. Hambatan terkait: kode 1 (masa TB berakhir, absensi masih ditandai TB),
+kode 2 (SK TB berlaku, absensi tidak ditandai TB), dan kode 5 (penandaan lebih pendek dari masa TB).
+
 ## Arti level dan kode hambatan
 
 | Level | Skor | Artinya |

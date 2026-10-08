@@ -2,6 +2,7 @@
 // Dipakai halaman Data TB dan ekspor Excel supaya isinya selalu sama.
 
 import type { PengaturanAturan } from "@/lib/aturan/pengaturan";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { KOSONG, saring, type BarisDihitung, type Saringan } from "@/lib/aturan/saringan";
 import { saringanDariUrl } from "@/lib/aturan/saringan-url";
 
@@ -67,8 +68,8 @@ export function uraikanSaringan(s: Saringan, p: PengaturanAturan): string[] {
   if (s.sisaHariMin !== undefined && s.sisaHariMax !== undefined) u.push(`Sisa hari ${s.sisaHariMin} s.d. ${s.sisaHariMax}`);
   else if (s.sisaHariMax !== undefined) u.push(s.sisaHariMax < 0 ? "Masa TB sudah lewat" : `Sisa hari ≤ ${s.sisaHariMax}`);
   else if (s.sisaHariMin !== undefined) u.push(`Sisa hari ≥ ${s.sisaHariMin}`);
-  if (s.presensi) u.push(`Presensi: ${s.presensi}`);
-  if (s.presensiTbTerisi) u.push("Presensi ditandai TB s.d. terisi");
+  if (s.presensi) u.push(`Absensi: ${labelAbsensi(s.presensi)}`);
+  if (s.presensiTbTerisi) u.push("Ditandai TB s.d. terisi");
   if (s.statusSk) u.push(s.statusSk === KOSONG ? "Status SK kosong" : `Status SK: ${s.statusSk}`);
   if (s.adaCekData) u.push("Ada catatan Cek data");
   return u;

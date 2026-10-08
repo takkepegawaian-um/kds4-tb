@@ -135,12 +135,11 @@ export function hitungRingkasan(
     }),
   }));
 
-  // --- Presensi, khusus Bebas TriDharma (B86:C92)
+  // --- Absensi, khusus Bebas TriDharma (B86:C92; baris "tidak jelas / MISTERY" sudah dihapus)
   const bebas: Saringan = { sedangTb: true, jenis: NILAI.BEBAS };
   const presensi = {
     aktif: angka(baris, s({ ...bebas, presensi: NILAI.AKTIF })),
     nonAktif: angka(baris, s({ ...bebas, presensi: NILAI.NON_AKTIF })),
-    tidakJelas: angka(baris, s({ ...bebas, presensi: NILAI.PRESENSI_TIDAK_JELAS })),
     ditandaiTerisi: angka(baris, s({ ...bebas, presensiTbTerisi: true })),
     kode5: angka(baris, s({ sedangTb: true, kode: 5 })),
     kode1: angka(baris, s({ sedangTb: true, kode: 1 })),

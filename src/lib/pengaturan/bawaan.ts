@@ -44,8 +44,8 @@ export const PARAMETER_BAWAAN: ParameterBawaan[] = [
     kunci: "ambangPresensiHari",
     nilai: "90",
     tipe: "angka",
-    label: "Ambang peringatan presensi ditandai TB hampir habis (hari)",
-    keterangan: 'Pilihan unit. Dipakai untuk catatan "Presensi ditandai TB s.d.".',
+    label: "Ambang peringatan penandaan TB di absensi hampir habis (hari)",
+    keterangan: 'Pilihan unit. Dipakai untuk "Ditandai TB s.d.".',
   },
   {
     kunci: "batasTertahanHari",
@@ -124,15 +124,15 @@ export const ATURAN_HAMBATAN_BAWAAN = [
   { kode: 0, nama: "Tidak ada hambatan terdeteksi", skorDasar: 0, saran: "-" },
   {
     kode: 1,
-    nama: "Presensi masih bebas padahal masa TB sudah berakhir",
+    nama: "Masa TB berakhir, tetapi absensi masih ditandai TB",
     skorDasar: 90,
-    saran: "Cek dasar SK. Bila tidak ada SK yang berlaku, koreksi penandaan presensi dan proses pengaktifan kembali.",
+    saran: "Cek dasar SK. Bila tidak ada SK yang berlaku, cabut tanda TB di absensi dan proses pengaktifan kembali.",
   },
   {
     kode: 2,
-    nama: "Presensi NON AKTIF padahal SK TB masih berlaku",
+    nama: "SK TB berlaku, tetapi absensi tidak ditandai TB",
     skorDasar: 85,
-    saran: "Tandai ulang presensi sebagai TB supaya tunjangan dan kinerja tidak terpotong.",
+    saran: "Tandai absensi sebagai TB supaya tunjangan dan kinerja tidak terpotong.",
   },
   {
     kode: 3,
@@ -149,9 +149,9 @@ export const ATURAN_HAMBATAN_BAWAAN = [
   },
   {
     kode: 5,
-    nama: "Presensi ditandai TB lebih pendek dari masa TB",
+    nama: "Penandaan TB di absensi lebih pendek dari masa TB",
     skorDasar: 70,
-    saran: "Tandai presensi periode berikutnya sebelum penandaan habis.",
+    saran: "Tandai absensi periode berikutnya sebelum penandaan habis.",
   },
   {
     kode: 6,
@@ -205,7 +205,7 @@ export const KATEGORI_PILIHAN = {
   JENIS_PELAKSANAAN: "Jenis pelaksanaan",
   LOKASI: "Lokasi",
   KONDISI_KULIAH: "Kondisi kuliah",
-  PRESENSI: "Presensi di sistem",
+  PRESENSI: "Status absensi",
   JENJANG: "Jenjang",
 } as const;
 
@@ -226,8 +226,8 @@ export const PILIHAN_BAWAAN: { kategori: KategoriPilihan; nilai: string[]; siste
   { kategori: "KONDISI_KULIAH", nilai: ["Belum kuliah", "Sedang kuliah", "Sudah kuliah"] },
   {
     kategori: "PRESENSI",
-    nilai: ["AKTIF", "NON AKTIF", "MISTERY??"],
-    sistem: ["AKTIF", "NON AKTIF", "MISTERY??"],
+    nilai: ["AKTIF", "NON AKTIF"],
+    sistem: ["AKTIF", "NON AKTIF"],
   },
   // Jenjang tidak punya validasi di Excel; daftar ini diambil dari isi data.
   {

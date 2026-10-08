@@ -19,7 +19,6 @@ export const NILAI = {
   TETAP: "Tetap",
   AKTIF: "AKTIF",
   NON_AKTIF: "NON AKTIF",
-  PRESENSI_TIDAK_JELAS: "MISTERY??",
   USUL_PENGAKTIFAN: "Usul Pengaktifan",
   TAHAP_TB_BERJALAN: "TB berjalan",
   SK_YA: "Ya",
@@ -142,10 +141,10 @@ function hitungBaris(r: InputPegawai, k: Konteks): Omit<HasilPegawai, "peringkat
   const bebas = sama(I, NILAI.BEBAS);
   const belum = sama(AA, NILAI.SK_BELUM);
   const syarat: [number, () => boolean][] = [
-    // 1 Presensi masih bebas padahal masa TB sudah berakhir
+    // 1 Masa TB berakhir, tetapi absensi masih ditandai TB (AKTIF)
     //   AND($I="Bebas",N($X)>0,$T="AKTIF",$X<Acuan)
     [1, () => bebas && n(X) > 0 && sama(T, NILAI.AKTIF) && X! < acuan],
-    // 2 Presensi NON AKTIF padahal SK TB masih berlaku
+    // 2 SK TB berlaku, tetapi absensi tidak ditandai TB (NON AKTIF)
     //   AND($I="Bebas",$T="NON AKTIF",$AA="Ya",N($X)>0,$X>=Acuan)
     [2, () => bebas && sama(T, NILAI.NON_AKTIF) && sama(AA, NILAI.SK_YA) && n(X) > 0 && X! >= acuan],
     // 3 Kuliah berjalan lebih dari 1 semester tanpa SK
@@ -154,7 +153,7 @@ function hitungBaris(r: InputPegawai, k: Konteks): Omit<HasilPegawai, "peringkat
     // 4 Masa TB berakhir, belum ada perpanjangan atau pengaktifan
     //   AND(N($X)>0,$P<>"Usul Pengaktifan",$X<Acuan)
     [4, () => n(X) > 0 && !sama(P, NILAI.USUL_PENGAKTIFAN) && X! < acuan],
-    // 5 Presensi ditandai TB lebih pendek dari masa TB
+    // 5 Penandaan TB di absensi lebih pendek dari masa TB
     //   AND($I="Bebas",N($U)>0,N($X)>0,$U<$X,$U-Acuan<=AmbangPresensi)
     [5, () => bebas && n(U) > 0 && n(X) > 0 && U! < X! && U! - acuan <= p.ambangPresensiHari],
     // 6 Usul melewati batas 14 hari kerja sebelum kuliah
@@ -212,7 +211,7 @@ function hitungBaris(r: InputPegawai, k: Konteks): Omit<HasilPegawai, "peringkat
 
   // AJ Cek data (hanya Sedang TB)
   //   TRIM(IF(COUNTIF(NIP,$C)>1,"NIP kembar. ","") & IF($N="","TMT atau masa studi kosong. ","")
-  //        & IF($T="MISTERY??","Status presensi tidak jelas. ","") & IF($I="","Jenis pelaksanaan kosong. ","")
+  //        & IF($I="","Jenis pelaksanaan kosong. ","")
   //        & IF($E="","Fakultas kosong. ",""))
   // Perbedaan yang disengaja: NIP dibandingkan utuh 18 digit. COUNTIF di Excel hanya
   // membandingkan 15 digit pertama sehingga keliru menandai NIP yang mirip sebagai kembar.
@@ -223,7 +222,6 @@ function hitungBaris(r: InputPegawai, k: Konteks): Omit<HasilPegawai, "peringkat
     const isi = [
       nip !== "" && (k.jumlahNip.get(nip) ?? 0) > 1 ? "NIP kembar." : "",
       N === null ? "TMT atau masa studi kosong." : "",
-      sama(T, NILAI.PRESENSI_TIDAK_JELAS) ? "Status presensi tidak jelas." : "",
       kosong(I) ? "Jenis pelaksanaan kosong." : "",
       kosong(r.fakultas) ? "Fakultas kosong." : "",
     ].filter(Boolean);

@@ -60,7 +60,22 @@ describe.skipIf(!adaExcel)("Pengaturan bawaan = sheet Pengaturan di Excel", () =
       skorDasar: nilaiSel(ws, `D${27 + i}`),
       saran: nilaiSel(ws, `E${27 + i}`),
     }));
-    expect(ATURAN_HAMBATAN_BAWAAN).toEqual(excel);
+    // Kode, skor dasar, dan nama/saran semua kode SAMA dengan Excel, kecuali nama dan saran
+    // kode 1, 2, dan 5 yang istilahnya sengaja diganti (permintaan pengguna 08/10/2026;
+    // lihat test berikutnya).
+    const KODE_ISTILAH_BARU = [1, 2, 5];
+    expect(ATURAN_HAMBATAN_BAWAAN.map((a) => [a.kode, a.skorDasar])).toEqual(excel.map((a) => [a.kode, a.skorDasar]));
+    expect(ATURAN_HAMBATAN_BAWAAN.filter((a) => !KODE_ISTILAH_BARU.includes(a.kode))).toEqual(
+      excel.filter((a) => !KODE_ISTILAH_BARU.includes(a.kode as number)),
+    );
+  });
+
+  it("istilah absensi diganti pada kode 1, 2, dan 5 (selisih yang disengaja terhadap Excel)", () => {
+    const per = Object.fromEntries(ATURAN_HAMBATAN_BAWAAN.map((a) => [a.kode, a]));
+    expect(per[1].nama).toBe("Masa TB berakhir, tetapi absensi masih ditandai TB");
+    expect(per[2].nama).toBe("SK TB berlaku, tetapi absensi tidak ditandai TB");
+    expect(per[5].nama).toBe("Penandaan TB di absensi lebih pendek dari masa TB");
+    for (const k of [1, 2, 5]) expect(per[k].nama + per[k].saran).not.toMatch(/presensi|NON AKTIF|MISTERY/i);
   });
 
   it("hari libur di Excel masih kosong (G6:G40)", async () => {
@@ -73,7 +88,8 @@ describe.skipIf(!adaExcel)("Pengaturan bawaan = sheet Pengaturan di Excel", () =
     const ambil = (k: string) => PILIHAN_BAWAAN.find((p) => p.kategori === k)!.nilai;
     expect(ambil("JENIS_PELAKSANAAN")).toEqual(["Bebas", "Tetap"]);
     expect(ambil("KONDISI_KULIAH")).toEqual(["Belum kuliah", "Sedang kuliah", "Sudah kuliah"]);
-    expect(ambil("PRESENSI")).toEqual(["AKTIF", "NON AKTIF", "MISTERY??"]);
+    // Excel memuat "MISTERY??" sebagai pilihan ketiga; sengaja dihapus (permintaan pengguna 08/10/2026).
+    expect(ambil("PRESENSI")).toEqual(["AKTIF", "NON AKTIF"]);
     expect(ambil("LOKASI")).toEqual(["DN", "LN"]);
     expect(ambil("STATUS_AKHIR")).toEqual(["Sedang TB", "Sudah PK", "Expired", "Lulus", "Rencana studi"]);
   });

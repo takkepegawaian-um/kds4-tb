@@ -9,6 +9,7 @@ import clsx from "clsx";
 import { Tombol } from "@/components/ui";
 import { LEVEL } from "@/lib/aturan/pengaturan";
 import { ATURAN_HAMBATAN_BAWAAN, STATUS_SK_BAWAAN } from "@/lib/pengaturan/bawaan";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { formatTanggal } from "@/lib/tanggal";
 import {
   hapusLibur,
@@ -343,7 +344,7 @@ export function KelolaPilihan({ kategori, judul, isi }: { kategori: string; judu
         {isi.map((p, i) => (
           <li key={p.id} className="flex items-center gap-2 py-1.5">
             <span className={clsx("flex-1 text-[15px]", !p.aktif && "text-gray-400 line-through")}>
-              {p.nilai} {p.sistem && <Lock size={12} className="inline text-gray-400" aria-label="Dipakai aturan" />}
+              {kategori === "PRESENSI" ? labelAbsensi(p.nilai) : p.nilai} {p.sistem && <Lock size={12} className="inline text-gray-400" aria-label="Dipakai aturan" />}
             </span>
             <span className="text-xs text-gray-500 tabular-nums">{p.dipakai} orang</span>
             <button type="button" className={tombolIkon} disabled={proses || i === 0} onClick={() => jalankan(() => ubahPilihan(p.id, { geser: -1 }))} aria-label="Naikkan"><ArrowUp size={15} /></button>

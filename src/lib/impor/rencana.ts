@@ -10,6 +10,7 @@
 //    dicocokkan berdasarkan NIP + nama (tanpa memperhatikan tanda baca, spasi,
 //    dan huruf besar/kecil), berpasangan menurut urutan baris.
 
+import { bacaAbsensi } from "@/lib/aturan/label-absensi";
 import { KOLOM_INPUT, type BarisExcel, type NamaKolomInput } from "@/lib/excel/data-tb";
 
 export type NilaiPegawai = BarisExcel["nilai"];
@@ -48,8 +49,10 @@ export function kunciNama(nama: string | null): string {
 function rapikanPilihan(nilai: NilaiPegawai, daftar: DaftarPilihanImpor, peringatan: string[]): NilaiPegawai {
   const hasil = { ...nilai };
   for (const [kolom, pilihan] of Object.entries(daftar) as [NamaKolomInput, string[]][]) {
-    const v = hasil[kolom];
+    let v = hasil[kolom];
     if (typeof v !== "string" || !pilihan) continue;
+    // Berkas hasil ekspor memuat tulisan di layar ("Ditandai TB"); ubah ke nilai tersimpan (AKTIF).
+    if (kolom === "presensi") v = bacaAbsensi(v) ?? v;
     const baku = pilihan.find((p) => p.toLowerCase() === v.toLowerCase());
     if (baku) hasil[kolom] = baku;
     else peringatan.push(`${JUDUL[kolom]} "${v}" tidak ada di daftar pilihan`);

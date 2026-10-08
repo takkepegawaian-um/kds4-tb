@@ -57,14 +57,13 @@ describe("periksa isian form", () => {
   });
 
   it("kelengkapan Sedang TB seperti kolom Cek data", () => {
-    const h = periksaIsian({ nama: "A", nip: "199001012020121001", statusAkhir: "Sedang TB", presensi: "MISTERY??" }, DAFTAR);
+    const h = periksaIsian({ nama: "A", nip: "199001012020121001", statusAkhir: "Sedang TB" }, DAFTAR);
     expect(h.peringatan).toEqual([
       "Jenis pelaksanaan kosong.",
       "Fakultas kosong.",
       "Masa studi s.d. kosong: hambatan dihitung sebagai kode 12.",
       "TMT TB kosong.",
       "Status SK kosong: hambatan dihitung sebagai kode 11.",
-      "Status presensi tidak jelas.",
     ]);
     // orang arsip tidak diperiksa kelengkapannya
     expect(periksaIsian({ nama: "A", nip: "199001012020121001", statusAkhir: "Lulus" }, DAFTAR).peringatan).toEqual([]);

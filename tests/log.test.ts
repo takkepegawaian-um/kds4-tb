@@ -21,7 +21,7 @@ describe("log aktivitas", () => {
 
   it("nama kolom Data TB memakai label form", () => {
     expect(labelKolom("statusSk")).toBe("Status SK");
-    expect(labelKolom("presensiTbSd")).toBe("Presensi ditandai TB s.d.");
+    expect(labelKolom("presensiTbSd")).toBe("Ditandai TB s.d.");
     expect(labelKolom("kolomLain")).toBe("kolomLain");
   });
 });

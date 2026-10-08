@@ -45,9 +45,9 @@ export const ISIAN: Record<KolomForm, DefinisiIsian> = {
     label: "Tanggal masuk tahap",
     isian: { jenis: "tanggal" },
   },
-  presensi: { label: "Presensi di sistem", isian: { jenis: "pilihan", daftar: "PRESENSI" } },
-  presensiTbSd: { label: "Presensi ditandai TB s.d.", isian: { jenis: "tanggal" } },
-  catatan: { label: "Catatan (presensi & lainnya)", isian: { jenis: "panjang" } },
+  presensi: { label: "Status absensi", isian: { jenis: "pilihan", daftar: "PRESENSI" } },
+  presensiTbSd: { label: "Ditandai TB s.d.", isian: { jenis: "tanggal" } },
+  catatan: { label: "Catatan (absensi & lainnya)", isian: { jenis: "panjang" } },
 };
 
 export const KELOMPOK_FORM: { judul: string; kolom: KolomForm[] }[] = [
@@ -58,7 +58,7 @@ export const KELOMPOK_FORM: { judul: string; kolom: KolomForm[] }[] = [
     kolom: ["jenjang", "lokasi", "sumberBiaya", "tempatStudi", "kondisiKuliah", "tmtTb", "masaStudiSd", "perpanjanganSd"],
   },
   { judul: "SK", kolom: ["statusSk", "noSk", "linkSk", "tanggalMasukTahap"] },
-  { judul: "Presensi dan catatan", kolom: ["presensi", "presensiTbSd", "catatan"] },
+  { judul: "Absensi dan catatan", kolom: ["presensi", "presensiTbSd", "catatan"] },
 ];
 
 export const SEMUA_KOLOM_FORM = KELOMPOK_FORM.flatMap((k) => k.kolom);
@@ -143,7 +143,6 @@ export function periksaIsian(
     if (!nilai.masaStudiSd) peringatan.push("Masa studi s.d. kosong: hambatan dihitung sebagai kode 12.");
     if (!nilai.tmtTb) peringatan.push("TMT TB kosong.");
     if (!nilai.statusSk) peringatan.push("Status SK kosong: hambatan dihitung sebagai kode 11.");
-    if (sama(nilai.presensi as string | null, NILAI.PRESENSI_TIDAK_JELAS)) peringatan.push("Status presensi tidak jelas.");
   }
 
   // Urutan tanggal

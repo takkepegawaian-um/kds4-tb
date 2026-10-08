@@ -29,11 +29,16 @@ export const KOLOM_INPUT = [
   { judul: "Kondisi kuliah", kolom: "kondisiKuliah", tipe: "teks" },
   { judul: "No SK / No usul", kolom: "noSk", tipe: "teks" },
   { judul: "Link SK", kolom: "linkSk", tipe: "teks" },
-  { judul: "Presensi di sistem", kolom: "presensi", tipe: "teks" },
-  { judul: "Presensi ditandai TB s.d.", kolom: "presensiTbSd", tipe: "tanggal" },
-  { judul: "Catatan (presensi & lainnya)", kolom: "catatan", tipe: "teks" },
+  { judul: "Status absensi", kolom: "presensi", tipe: "teks", alias: ["Presensi di sistem"] },
+  { judul: "Ditandai TB s.d.", kolom: "presensiTbSd", tipe: "tanggal", alias: ["Presensi ditandai TB s.d."] },
+  { judul: "Catatan (absensi & lainnya)", kolom: "catatan", tipe: "teks", alias: ["Catatan (presensi & lainnya)"] },
   { judul: "Tanggal masuk tahap", kolom: "tanggalMasukTahap", tipe: "tanggal" },
-] as const satisfies readonly { judul: string; kolom: string; tipe: TipeKolom }[];
+] as const satisfies readonly { judul: string; kolom: string; tipe: TipeKolom; alias?: readonly string[] }[];
+
+/** Judul kolom yang dikenali untuk sebuah kolom: judul baru dan judul lama (alias). */
+function semuaJudul(k: { judul: string; alias?: readonly string[] }): string[] {
+  return [k.judul, ...(k.alias ?? [])];
+}
 
 export type NamaKolomInput = (typeof KOLOM_INPUT)[number]["kolom"];
 
@@ -164,8 +169,8 @@ export function bacaSheetDataTb(ws: ExcelJS.Worksheet): HasilBacaSheet {
     if (j && !posisi.has(j)) posisi.set(j, kol);
   });
 
-  const dikenal = new Set([...KOLOM_INPUT.map((k) => rapikanJudul(k.judul)), ...KOLOM_HASIL.map(rapikanJudul)]);
-  const kolomHilang = KOLOM_INPUT.filter((k) => !posisi.has(rapikanJudul(k.judul))).map((k) => k.judul);
+  const dikenal = new Set([...KOLOM_INPUT.flatMap((k) => semuaJudul(k).map(rapikanJudul)), ...KOLOM_HASIL.map(rapikanJudul)]);
+  const kolomHilang = KOLOM_INPUT.filter((k) => !semuaJudul(k).some((j) => posisi.has(rapikanJudul(j)))).map((k) => k.judul);
   const kolomTidakDikenal = [...posisi.keys()].filter((j) => !dikenal.has(j));
 
   const data: BarisExcel[] = [];
@@ -180,7 +185,7 @@ export function bacaSheetDataTb(ws: ExcelJS.Worksheet): HasilBacaSheet {
     const galat: string[] = [];
     const peringatan: string[] = [];
     for (const k of KOLOM_INPUT) {
-      const mentah = ambil(k.judul);
+      const mentah = semuaJudul(k).reduce<unknown>((acc, j) => (acc ?? ambil(j)), null);
       if (k.tipe === "tanggal") {
         const t = bacaTanggal(mentah);
         if (t === undefined) {

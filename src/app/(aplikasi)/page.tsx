@@ -330,20 +330,19 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
           </div>
         </Kartu>
 
-        {/* Presensi */}
+        {/* Absensi */}
         <Kartu>
-          <JudulKartu>Presensi</JudulKartu>
+          <JudulKartu>Absensi (Bebas TriDharma)</JudulKartu>
           <div className="overflow-x-auto">
           <table className="w-full">
             <tbody className="divide-y divide-krem-100">
               {([
-                ["Presensi tercatat AKTIF", r.presensi.aktif],
-                ["Presensi tercatat NON AKTIF", r.presensi.nonAktif],
-                ["Presensi tidak jelas (MISTERY??)", r.presensi.tidakJelas],
-                ["Presensi ditandai TB s.d. diisi", r.presensi.ditandaiTerisi],
-                ["Penandaan habis dalam ambang hari, padahal TB lebih panjang", r.presensi.kode5],
-                ["Presensi bebas padahal masa TB berakhir", r.presensi.kode1],
-                ["Presensi NON AKTIF padahal SK masih berlaku", r.presensi.kode2],
+                ["Ditandai TB", r.presensi.aktif],
+                ["Tidak ditandai TB (absen sendiri)", r.presensi.nonAktif],
+                ["Tanggal ditandai TB terisi", r.presensi.ditandaiTerisi],
+                ["Penandaan TB habis dalam ambang hari, padahal masa TB lebih panjang", r.presensi.kode5],
+                ["Masa TB berakhir, absensi masih ditandai TB", r.presensi.kode1],
+                ["SK TB berlaku, absensi tidak ditandai TB", r.presensi.kode2],
               ] as const).map(([label, a]) => (
                 <tr key={label}>
                   <td className={td}>{label}</td>

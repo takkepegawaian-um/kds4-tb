@@ -243,8 +243,8 @@ describe("cek data", () => {
   });
 
   it("menggabungkan semua catatan seperti Excel", () => {
-    const h = hitung({ masaStudiSd: null, presensi: "MISTERY??", jenisPelaksanaan: null, fakultas: null });
-    expect(h.cekData).toBe("TMT atau masa studi kosong. Status presensi tidak jelas. Jenis pelaksanaan kosong. Fakultas kosong.");
+    const h = hitung({ masaStudiSd: null, jenisPelaksanaan: null, fakultas: null });
+    expect(h.cekData).toBe("TMT atau masa studi kosong. Jenis pelaksanaan kosong. Fakultas kosong.");
   });
 
   it("NIP yang bukan 18 digit diberi peringatan, tidak ditolak", () => {

@@ -9,6 +9,7 @@ import { AlertTriangle, Info, XCircle } from "lucide-react";
 import clsx from "clsx";
 import { Kartu, Tombol } from "@/components/ui";
 import { ISIAN, KELOMPOK_FORM, type DaftarPilihanForm, type KolomForm } from "@/lib/data/formulir";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { formatTanggal, hariIniJakarta } from "@/lib/tanggal";
 import { cekNip, simpanPegawai } from "./aksi";
 
@@ -112,7 +113,7 @@ export function FormPegawai({ id, awal, daftar, petaTahap, tahapKosong }: Props)
                   <select id={idIsian} value={nilai} onChange={(e) => ubah(kolom, e.target.value)} className={`${kelas} h-11`}>
                     <option value="">{def.wajib ? "Pilih…" : "(kosong)"}</option>
                     {pilihan.map((p) => (
-                      <option key={p} value={p}>{p}</option>
+                      <option key={p} value={p}>{kolom === "presensi" ? labelAbsensi(p) : p}</option>
                     ))}
                     {diLuar && <option value={nilai}>{nilai} (tidak ada di daftar)</option>}
                   </select>

@@ -49,6 +49,8 @@ describe.skipIf(!diminta || !adaExcel)("Data di database sama dengan DATA_TB.xls
         const a = b.nilai[kolom];
         const c = tersimpan[kolom];
         const sama = typeof a === "string" && typeof c === "string" ? a.toLowerCase() === c.toLowerCase() : a === c;
+        // Selisih disengaja (08/10/2026): "MISTERY??" di baris 50 diubah menjadi AKTIF.
+        if (kolom === "presensi" && b.baris === 50 && a === "MISTERY??" && c === "AKTIF") continue;
         if (!sama) beda.push(`baris ${b.baris} ${judul}: Excel ${JSON.stringify(a)}, database ${JSON.stringify(c)}`);
       }
     }
@@ -74,7 +76,8 @@ describe.skipIf(!diminta || !adaExcel)("Data di database sama dengan DATA_TB.xls
       cek("Skor", x["Skor"], h.skor);
       cek("Level", x["Level"], h.level);
       cek("Peringkat", x["Peringkat"], h.peringkat);
-      cek("Hambatan utama", x["Hambatan utama"], h.hambatan);
+      // Selisih disengaja: nama hambatan kode 1, 2, dan 5 memakai istilah absensi yang baru.
+      if (![1, 2, 5].includes(h.kode)) cek("Hambatan utama", x["Hambatan utama"], h.hambatan);
       cek("Sisa hari", x["Sisa hari"], h.sisaHari);
     });
     console.log(`\nDATABASE vs EXCEL: ${pegawai.length} orang, ${KOLOM_INPUT.length} kolom input + 6 kolom hasil per orang, ${beda.length + bedaHasil.length} selisih.`);

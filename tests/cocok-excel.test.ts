@@ -33,6 +33,9 @@ const SELISIH_DISENGAJA: { baris: number; kolom: string; excel: unknown; aplikas
   { baris: 36, kolom: "Cek data", excel: "NIP kembar.", aplikasi: null },
   { baris: 37, kolom: "Cek data", excel: "NIP kembar.", aplikasi: null },
   { baris: 48, kolom: "Cek data", excel: "NIP kembar.", aplikasi: null },
+  // Isian "MISTERY??" dihapus dari daftar pilihan (permintaan pengguna 08/10/2026), jadi catatan ini
+  // tidak lagi dibuat. Hanya baris 50 yang berisi MISTERY??.
+  { baris: 50, kolom: "Cek data", excel: "Status presensi tidak jelas.", aplikasi: null },
 ];
 
 type Selisih = { baris: number; nip: string; kolom: string; excel: unknown; aplikasi: unknown };
@@ -101,7 +104,16 @@ describe.skipIf(!adaExcel)("Pencocokan dengan DATA_TB.xlsx", () => {
     const c5 = nilaiSel(wb.getWorksheet("Pengaturan")!.getCell("C5"));
     tanggalAcuan = (c5 as Date).toISOString().slice(0, 10);
 
+    // Logika diuji dengan KATA-KATA ASLI Excel (nama hambatan dan saran dari sheet Pengaturan),
+    // supaya perbedaan istilah yang disengaja (lihat tests/pengaturan-bawaan.test.ts) tidak
+    // tampil sebagai selisih hitungan.
     const pengaturan = pengaturanBawaan();
+    const wsPeng = wb.getWorksheet("Pengaturan")!;
+    pengaturan.aturan = pengaturan.aturan.map((a) => ({
+      ...a,
+      nama: nilaiSel(wsPeng.getCell(`C${27 + a.kode}`)) as string,
+      saran: nilaiSel(wsPeng.getCell(`E${27 + a.kode}`)) as string,
+    }));
     const input = barisExcel.map(keInput);
     hasil = hitungSemua(input, pengaturan, tanggalAcuan);
     dihitung = input.map((i, k) => ({ input: i, hasil: hasil[k] }));
@@ -263,11 +275,17 @@ describe.skipIf(!adaExcel)("Pencocokan dengan DATA_TB.xlsx", () => {
       cek(`E${76 + i}`, m.total);
     });
 
-    // Presensi C86:C92
+    // Absensi C86:C92. C88 ("Presensi tidak jelas (MISTERY??)", Excel = 1) sengaja tidak ada lagi.
     const pr = ringkasan.presensi;
-    [pr.aktif, pr.nonAktif, pr.tidakJelas, pr.ditandaiTerisi, pr.kode5, pr.kode1, pr.kode2].forEach((a, i) =>
-      cek(`C${86 + i}`, a.jumlah),
-    );
+    [
+      ["C86", pr.aktif],
+      ["C87", pr.nonAktif],
+      ["C89", pr.ditandaiTerisi],
+      ["C90", pr.kode5],
+      ["C91", pr.kode1],
+      ["C92", pr.kode2],
+    ].forEach(([alamat, a]) => cek(alamat as string, (a as typeof pr.aktif).jumlah));
+    expect(sel("C88")).toBe(1); // yang dihapus memang ada satu orang di Excel (baris 50)
 
     // Rekap resmi B97:G107
     const rekap = hitungRekapResmi(dihitung, REKAP_RESMI_FAKULTAS_BAWAAN);

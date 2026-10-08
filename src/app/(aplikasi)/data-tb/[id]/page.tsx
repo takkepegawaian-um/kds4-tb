@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, ChevronLeft, ExternalLink, Pencil } from "
 import { JudulKartu, Kartu, KotakInfo, LencanaLevel, MemuatData, TombolTautan } from "@/components/ui";
 import { hitungSemua } from "@/lib/aturan/mesin";
 import { wajibLogin } from "@/lib/auth/sesi";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { prisma } from "@/lib/db";
 import { ISIAN, KELOMPOK_FORM } from "@/lib/data/formulir";
 import { muatSemuaDihitung } from "@/lib/data/pegawai";
@@ -150,7 +151,7 @@ async function IsiDetail({ params, searchParams }: { params: Promise<{ id: strin
               {k.kolom.map((kolom) => {
                 const v = nilai[kolom];
                 const def = ISIAN[kolom];
-                let isi: ReactNode = v === null ? null : def.isian.jenis === "tanggal" ? formatTanggal(String(v)) : String(v);
+                let isi: ReactNode = v === null ? null : def.isian.jenis === "tanggal" ? formatTanggal(String(v)) : kolom === "presensi" ? labelAbsensi(String(v)) : String(v);
                 if (kolom === "linkSk" && typeof v === "string") isi = <TautanSk teks={v} />;
                 return (
                   <Isi key={kolom} label={def.label} lebar={def.isian.jenis === "panjang" || kolom === "linkSk"}>
@@ -222,6 +223,7 @@ async function Riwayat({ id }: { id: number }) {
   const tampil = (kolom: string | null, v: string | null) => {
     if (v === null || v === "") return <span className="text-gray-400 italic">kosong</span>;
     const def = kolom ? ISIAN[kolom as keyof typeof ISIAN] : undefined;
+    if (kolom === "presensi") return labelAbsensi(v);
     return def?.isian.jenis === "tanggal" ? formatTanggal(v) : v;
   };
   return (

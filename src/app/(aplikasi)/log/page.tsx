@@ -20,6 +20,7 @@ import {
   PERISTIWA_PENTING,
   ringkasPerangkat,
 } from "@/lib/data/log-label";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { ISIAN } from "@/lib/data/formulir";
 import { formatTanggal, formatWaktu } from "@/lib/tanggal";
 
@@ -169,6 +170,7 @@ function Ringkas({ label, nilai, penting }: { label: string; nilai: number; pent
 function Nilai({ kolom, v }: { kolom: string | null; v: string | null }) {
   if (v === null || v === "") return <span className="text-gray-400 italic">kosong</span>;
   const def = kolom ? ISIAN[kolom as keyof typeof ISIAN] : undefined;
+  if (kolom === "presensi") return <>{labelAbsensi(v)}</>;
   return <>{def?.isian.jenis === "tanggal" ? formatTanggal(v) : v}</>;
 }
 

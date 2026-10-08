@@ -52,6 +52,20 @@ Fakultas): Excel "0", aplikasi kosong.**
 Rumus `INDEX` di Excel yang merujuk sel kosong menghasilkan angka 0. Sel sumbernya memang
 kosong; aplikasi menampilkannya kosong.
 
+**3. Istilah absensi (08/10/2026): kolom "Cek data" baris 50 dan pilihan "MISTERY??".**
+Isian "MISTERY??" dihapus dari pilihan Status absensi atas permintaan pengguna. Satu-satunya
+orang yang memakainya (baris 50) diubah menjadi AKTIF lewat migrasi database, dan tercatat di Log
+perubahan. Akibatnya catatan "Status presensi tidak jelas." di Cek data baris 50 tidak muncul lagi,
+dan baris "Presensi tidak jelas (MISTERY??)" (Excel: 1) tidak ada lagi di Ringkasan. Kode, skor,
+level, dan peringkat tidak berubah.
+
+**4. Istilah absensi: nama dan saran hambatan kode 1, 2, dan 5.**
+Kode, skor, dan syaratnya sama dengan Excel; hanya kalimatnya yang diganti supaya tidak membingungkan:
+"Presensi masih bebas…" → "Masa TB berakhir, tetapi absensi masih ditandai TB"; "Presensi NON AKTIF
+padahal SK TB masih berlaku" → "SK TB berlaku, tetapi absensi tidak ditandai TB"; "Presensi ditandai TB
+lebih pendek…" → "Penandaan TB di absensi lebih pendek dari masa TB". Tes pencocokan memakai
+kalimat asli Excel untuk logika, dan satu tes khusus memeriksa kalimat barunya.
+
 ## Perbedaan cara hitung yang tidak mengubah hasil saat ini
 
 - **Angka Bebas/Tetap di Dashboard hanya menghitung orang "Sedang TB".** Excel menghitung

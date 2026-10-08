@@ -7,6 +7,7 @@ import { useMemo, useRef, useState, useTransition, type ReactNode } from "react"
 import { AlertTriangle, CheckCircle2, FileSpreadsheet, XCircle } from "lucide-react";
 import clsx from "clsx";
 import { Kartu, JudulKartu, KotakInfo, Tombol } from "@/components/ui";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { formatTanggal } from "@/lib/tanggal";
 import { periksaBerkas, simpanImpor, type HasilSimpan, type PratinjauImpor } from "./aksi";
 
@@ -14,6 +15,7 @@ const KOLOM_TANGGAL = new Set(["tmtTb", "masaStudiSd", "perpanjanganSd", "presen
 
 function tampil(kolom: string, v: string | number | null) {
   if (v === null || v === "") return <span className="text-gray-400 italic">kosong</span>;
+  if (kolom === "presensi") return labelAbsensi(String(v));
   return KOLOM_TANGGAL.has(kolom) ? formatTanggal(String(v)) : String(v);
 }
 

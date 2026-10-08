@@ -2,6 +2,7 @@
 // Mengikuti saringan dan urutan yang sedang dipakai di halaman Data TB.
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
+import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { acuanDariUrl } from "@/lib/data/acuan";
 import { pilihBaris, uraikanSaringan } from "@/lib/data/daftar";
 import { prisma } from "@/lib/db";
@@ -30,7 +31,7 @@ export async function GET(request: NextRequest) {
       judul: k.judul,
       lebar: LEBAR[k.kolom] ?? (k.tipe === "tanggal" ? 13 : 15),
       tipe: k.tipe,
-      ambil: (b: B) => b.nilai[k.kolom],
+      ambil: (b: B) => (k.kolom === "presensi" ? labelAbsensi(b.nilai.presensi as string | null) || null : b.nilai[k.kolom]),
     })),
     { judul: "Akhir efektif", lebar: 13, tipe: "tanggal", hitungan: true, ambil: (b) => b.hasil.akhirEfektif },
     { judul: "Sisa hari", lebar: 9, hitungan: true, ambil: (b) => b.hasil.sisaHari },
