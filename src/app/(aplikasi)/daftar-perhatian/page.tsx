@@ -16,7 +16,6 @@ export default function HalamanDaftarPerhatian({ searchParams }: PageProps<"/daf
     <>
       <JudulHalaman
         judul="Daftar Perhatian"
-        keterangan="Orang Sedang TB yang punya hambatan, diurutkan dari skor tertinggi. Bahas Kritis dan Waspada lebih dulu."
       />
       <Suspense fallback={<MemuatData baris={10} />}>
         <IsiDaftar searchParams={searchParams} />

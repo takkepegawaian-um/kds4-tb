@@ -6,7 +6,7 @@ import { siapkanForm } from "../siapkan-form";
 export default function HalamanTambah() {
   return (
     <>
-      <JudulHalaman judul="Tambah pegawai TB" keterangan="Isi data sesuai dokumen. Hambatan dan saran dihitung otomatis setelah disimpan." />
+      <JudulHalaman judul="Tambah pegawai TB" />
       <Suspense fallback={<MemuatData baris={8} />}>
         <IsiForm />
       </Suspense>

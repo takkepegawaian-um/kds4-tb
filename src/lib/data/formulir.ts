@@ -13,11 +13,11 @@ export type JenisIsian =
   | { jenis: "tanggal" }
   | { jenis: "pilihan"; daftar: KategoriPilihan | "STATUS_SK" };
 
-export type DefinisiIsian = { label: string; isian: JenisIsian; bantuan?: string; wajib?: boolean };
+export type DefinisiIsian = { label: string; isian: JenisIsian; wajib?: boolean };
 
 export const ISIAN: Record<KolomForm, DefinisiIsian> = {
   nama: { label: "Nama lengkap dengan gelar", isian: { jenis: "teks" }, wajib: true },
-  nip: { label: "NIP", isian: { jenis: "teks" }, wajib: true, bantuan: "18 digit angka, tanpa spasi." },
+  nip: { label: "NIP", isian: { jenis: "teks" }, wajib: true },
   fakultas: { label: "Fakultas", isian: { jenis: "pilihan", daftar: "FAKULTAS" } },
   departemen: { label: "Departemen", isian: { jenis: "teks" } },
   jabatan: { label: "Jabatan", isian: { jenis: "teks" } },
@@ -25,28 +25,25 @@ export const ISIAN: Record<KolomForm, DefinisiIsian> = {
     label: "Status akhir",
     isian: { jenis: "pilihan", daftar: "STATUS_AKHIR" },
     wajib: true,
-    bantuan: 'Hambatan hanya dihitung untuk "Sedang TB".',
   },
   jenisPelaksanaan: {
     label: "Jenis pelaksanaan (TriDharma)",
     isian: { jenis: "pilihan", daftar: "JENIS_PELAKSANAAN" },
-    bantuan: "Bebas = tidak presensi (terkait tunjangan dan kinerja). Tetap = tetap menjalankan TriDharma.",
   },
   jenjang: { label: "Jenjang", isian: { jenis: "pilihan", daftar: "JENJANG" } },
-  lokasi: { label: "Lokasi studi", isian: { jenis: "pilihan", daftar: "LOKASI" }, bantuan: "DN = dalam negeri, LN = luar negeri." },
+  lokasi: { label: "Lokasi studi", isian: { jenis: "pilihan", daftar: "LOKASI" } },
   sumberBiaya: { label: "Sumber biaya", isian: { jenis: "teks" } },
   tempatStudi: { label: "Tempat studi", isian: { jenis: "teks" } },
   kondisiKuliah: { label: "Kondisi kuliah", isian: { jenis: "pilihan", daftar: "KONDISI_KULIAH" } },
   tmtTb: { label: "TMT TB (mulai)", isian: { jenis: "tanggal" } },
   masaStudiSd: { label: "Masa studi s.d.", isian: { jenis: "tanggal" } },
-  perpanjanganSd: { label: "Perpanjangan s.d.", isian: { jenis: "tanggal" }, bantuan: "Kosongkan bila belum ada perpanjangan." },
+  perpanjanganSd: { label: "Perpanjangan s.d.", isian: { jenis: "tanggal" } },
   statusSk: { label: "Status SK", isian: { jenis: "pilihan", daftar: "STATUS_SK" } },
   noSk: { label: "No SK / No usul", isian: { jenis: "teks" } },
-  linkSk: { label: "Link SK", isian: { jenis: "teks" }, bantuan: "Tautan berkas SK, mis. Google Drive." },
+  linkSk: { label: "Link SK", isian: { jenis: "teks" } },
   tanggalMasukTahap: {
     label: "Tanggal masuk tahap",
     isian: { jenis: "tanggal" },
-    bantuan: "Tanggal Status SK terakhir berubah. Dipakai untuk menghitung lama tertahan.",
   },
   presensi: { label: "Presensi di sistem", isian: { jenis: "pilihan", daftar: "PRESENSI" } },
   presensiTbSd: { label: "Presensi ditandai TB s.d.", isian: { jenis: "tanggal" } },

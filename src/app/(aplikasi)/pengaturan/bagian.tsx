@@ -107,7 +107,6 @@ export function FormParameter({ parameter }: { parameter: Param[] }) {
               className={clsx(masukan(galat[p.kunci]), "h-11", p.tipe === "angka" && "max-w-40")}
             />
             <Salah teks={galat[p.kunci]} />
-            {p.keterangan && !galat[p.kunci] && <p className="mt-1 text-xs text-gray-500">{p.keterangan}</p>}
           </div>
         ))}
       </div>
@@ -153,9 +152,7 @@ export function TabelAturan({ aturan }: { aturan: Aturan[] }) {
           <div key={a.kode} className={clsx("rounded-xl border p-4", a.aktif ? "border-krem-200" : "border-dashed border-krem-300 bg-krem-50 opacity-80")}>
             <div className="flex flex-wrap items-center gap-3">
               <span className="grid size-8 place-items-center rounded-full bg-hijau-900 text-sm font-bold text-white">{a.kode}</span>
-              {a.kode === 0 ? (
-                <span className="text-sm text-gray-500">Skor 0, selalu aktif (orang tanpa hambatan).</span>
-              ) : (
+              {a.kode === 0 ? null : (
                 <>
                   <label className="flex items-center gap-2 text-sm whitespace-nowrap">
                     Skor dasar
@@ -293,10 +290,6 @@ export function TabelStatusSk({ baris: awal, dipakai, terkunci }: { baris: Statu
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-gray-500">
-        <Lock size={11} className="inline" /> dipakai langsung oleh aturan hambatan. Nama Status SK yang sudah ada tidak bisa diganti (karena tersimpan
-        di data pegawai); tambahkan baris baru bila perlu. Tahap &quot;TB berjalan&quot; dipakai aturan kode 9.
-      </p>
       <BarisTombol>
         <Tombol type="button" onClick={() => setBaris((s) => [...s, { statusSk: "", tahap: "", pihakPenahan: "", skTerbit: "Belum", baru: true }])}>
           <Plus size={16} /> Tambah Status SK
@@ -429,7 +422,7 @@ export function KelolaLibur({ libur }: { libur: { tanggal: string; keterangan: s
         <Tombol type="submit" varian="utama" disabled={proses || !tanggal.trim()}><Plus size={16} /> Tambah</Tombol>
       </form>
       {libur.length === 0 ? (
-        <p className="text-[15px] text-gray-500">Belum ada tanggal libur. Hanya Sabtu dan Minggu yang dilewati saat menghitung hari kerja (sama seperti Excel).</p>
+        <p className="text-[15px] text-gray-500">Belum ada hari libur.</p>
       ) : (
         <ul className="divide-y divide-krem-100">
           {libur.map((h) => (

@@ -25,14 +25,6 @@ const WARNA_BEBAS = "#0f8a63";
 const WARNA_TETAP = "#b98424";
 const WARNA_LEVEL: Record<Exclude<Level, "Aman">, string> = { Kritis: "#d93a3a", Waspada: "#e0a800", Perhatian: "#3a78c2" };
 
-const KETERANGAN_STATUS: Record<string, string> = {
-  "Sedang TB": "Dinilai hambatannya",
-  "Sudah PK": "Dari Sudah PK & PK Iqbal",
-  Expired: "Masa TB berakhir",
-  Lulus: "Update gelar",
-  "Rencana studi": "Rencana studi lanjut",
-};
-
 type Parameter = Record<string, string | string[] | undefined>;
 
 /** Tautan ke daftar orang untuk sebuah angka (ikut membawa tanggal acuan simulasi). */
@@ -56,7 +48,6 @@ export default function HalamanRingkasan({ searchParams }: PageProps<"/">) {
     <>
       <JudulHalaman
         judul="Ringkasan"
-        keterangan="Posisi pegawai Tugas Belajar dan hambatan administrasinya. Bebas TriDharma (tidak presensi, terkait tunjangan dan kinerja) dipisah dari Tetap TriDharma."
       />
       <Suspense fallback={<MemuatData baris={12} />}>
         <IsiDashboard searchParams={searchParams} />
@@ -161,7 +152,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
             </Link>
           )}
           {(filter.fakultas || filter.jenis) && <> · disaring: {[filter.fakultas, filter.jenis].filter(Boolean).join(", ")}</>}
-          . Penilaian hambatan hanya untuk status akhir &quot;Sedang TB&quot;.
+          
         </p>
       </Kartu>
 
@@ -194,7 +185,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
       <div className="grid gap-6 xl:grid-cols-2">
         {/* Hambatan terdeteksi */}
         <Kartu className="xl:col-span-2">
-          <JudulKartu keterangan="Setiap orang Sedang TB dihitung pada satu hambatan utama (yang prioritasnya paling tinggi).">
+          <JudulKartu>
             Hambatan yang terdeteksi
           </JudulKartu>
           <GrafikBatang
@@ -210,26 +201,23 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Posisi per status akhir */}
         <Kartu>
-          <JudulKartu keterangan="Seluruh orang di Data TB.">Posisi per status akhir</JudulKartu>
+          <JudulKartu>Posisi per status akhir</JudulKartu>
           <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="border-b border-krem-200"><tr><th className={th}>Status akhir</th><th className={thK}>Jumlah</th><th className={thK}>%</th><th className={`${th} hidden sm:table-cell`}>Keterangan</th></tr></thead>
+            <thead className="border-b border-krem-200"><tr><th className={th}>Status akhir</th><th className={thK}>Jumlah</th><th className={thK}>%</th></tr></thead>
             <tbody className="divide-y divide-krem-100">
               {r.statusAkhir.baris.map((s) => (
                 <tr key={s.status}>
                   <td className={td}>{s.status}</td>
                   <td className={tdK}><TautanAngka acuan={acuan} a={s.jumlah} /></td>
                   <td className={`${tdK} text-gray-600`}>{(s.persen * 100).toLocaleString("id-ID", { maximumFractionDigits: 1 })}%</td>
-                  <td className={`${td} hidden text-sm text-gray-500 sm:table-cell`}>{KETERANGAN_STATUS[s.status] ?? ""}</td>
                 </tr>
               ))}
               <tr className="font-semibold">
                 <td className={td}>Total</td>
                 <td className={tdK}>{r.statusAkhir.total}</td>
                 <td className={tdK}>100%</td>
-                <td className={`${td} hidden text-sm sm:table-cell`}>
-                  {r.statusAkhir.cocok ? <span className="text-aman-fg">Cocok dengan Data TB</span> : <span className="text-kritis-fg">Cek: ada status kosong / tidak dikenal</span>}
-                </td>
+                <td className={`${td} text-sm text-kritis-fg`}>{!r.statusAkhir.cocok && "Ada status kosong / tidak dikenal"}</td>
               </tr>
             </tbody>
           </table>
@@ -238,7 +226,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Siapa yang menahan */}
         <Kartu>
-          <JudulKartu keterangan="Hanya orang yang punya hambatan.">Siapa yang menahan</JudulKartu>
+          <JudulKartu>Siapa yang menahan</JudulKartu>
           <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-krem-200"><tr><th className={th}>Pihak penahan</th><th className={thK}>Bebas</th><th className={thK}>Tetap</th><th className={thK}>Total</th></tr></thead>
@@ -258,7 +246,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Posisi per tahap */}
         <Kartu className="xl:col-span-2">
-          <JudulKartu keterangan='Hari tertahan terisi setelah kolom "Tanggal masuk tahap" diisi.'>Posisi per tahap</JudulKartu>
+          <JudulKartu>Posisi per tahap</JudulKartu>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="border-b border-krem-200"><tr><th className={th}>Tahap</th><th className={thK}>Jumlah</th><th className={thK}>Rata-rata hari tertahan</th><th className={thK}>Terlama (hari)</th><th className={thK}>Kritis atau Waspada</th></tr></thead>
@@ -279,7 +267,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Per fakultas */}
         <Kartu className="xl:col-span-2">
-          <JudulKartu keterangan="Arsip = selain Sedang TB.">Per fakultas</JudulKartu>
+          <JudulKartu>Per fakultas</JudulKartu>
           <div className="grid gap-6 lg:grid-cols-2">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -324,7 +312,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Masa TB berakhir */}
         <Kartu>
-          <JudulKartu keterangan="Dihitung dari akhir efektif (perpanjangan bila ada).">Masa TB berakhir</JudulKartu>
+          <JudulKartu>Masa TB berakhir</JudulKartu>
           <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="border-b border-krem-200"><tr><th className={th}>Jangka waktu</th><th className={thK}>Bebas</th><th className={thK}>Tetap</th><th className={thK}>Total</th></tr></thead>
@@ -344,7 +332,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Presensi */}
         <Kartu>
-          <JudulKartu keterangan="Khusus Bebas TriDharma (tidak presensi).">Presensi</JudulKartu>
+          <JudulKartu>Presensi</JudulKartu>
           <div className="overflow-x-auto">
           <table className="w-full">
             <tbody className="divide-y divide-krem-100">
@@ -369,7 +357,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Rekap resmi (manual) */}
         <Kartu>
-          <JudulKartu keterangan={`Angka rekap diketik manual (per ${formatTanggal(tanggalRekap?.nilai)}); diubah di Pengaturan. Selisih = Data TB dikurangi rekap.`}>
+          <JudulKartu keterangan={`Per ${formatTanggal(tanggalRekap?.nilai)}`}>
             Rekap resmi TB dan TB Biaya Mandiri
           </JudulKartu>
           <div className="overflow-x-auto">
@@ -401,7 +389,7 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
 
         {/* Rekap penerbitan SK (manual) */}
         <Kartu>
-          <JudulKartu keterangan="Angka diketik manual; diubah di Pengaturan.">Rekap penerbitan SK Tugas Belajar</JudulKartu>
+          <JudulKartu>Rekap penerbitan SK Tugas Belajar</JudulKartu>
           <div className="overflow-x-auto">
           <table className="w-full">
             <tbody className="divide-y divide-krem-100">
@@ -425,11 +413,6 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
         </Kartu>
       </div>
 
-      <p className="text-sm text-gray-500">
-        Cara membaca: orang Kritis dan Waspada sebaiknya dibahas lebih dulu. Daftar lengkap dan urutannya ada di{" "}
-        <Link href={acuan ? `/daftar-perhatian?acuan=${acuan}` : "/daftar-perhatian"} className="font-semibold text-hijau-900 underline">Daftar Perhatian</Link>.
-        Aturan hambatan, skor, dan ambang hari ada di Pengaturan.
-      </p>
     </div>
   );
 }

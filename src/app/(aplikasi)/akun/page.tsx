@@ -8,14 +8,14 @@ import { FormSandi, TombolKeluarSemua } from "./form-sandi";
 export default function HalamanAkun() {
   return (
     <>
-      <JudulHalaman judul="Akun" keterangan="Kata sandi dan perangkat yang sedang masuk." />
+      <JudulHalaman judul="Akun" />
       <div className="grid gap-6">
         <Kartu>
           <JudulKartu>Ganti kata sandi</JudulKartu>
           <FormSandi panjangMin={PANJANG_SANDI_MIN} />
         </Kartu>
         <Kartu>
-          <JudulKartu keterangan="Setiap sesi berlaku 8 jam sejak masuk.">Perangkat yang sedang masuk</JudulKartu>
+          <JudulKartu>Perangkat yang sedang masuk</JudulKartu>
           <Suspense fallback={<MemuatData baris={2} />}>
             <DaftarSesi />
           </Suspense>

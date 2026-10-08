@@ -69,7 +69,7 @@ export function FormImpor() {
   return (
     <div className="grid gap-6">
       <Kartu>
-        <JudulKartu keterangan="Berkas hanya dibaca. Belum ada yang disimpan sampai Anda menekan tombol Simpan.">
+        <JudulKartu>
           1. Pilih berkas Excel
         </JudulKartu>
         <label
@@ -82,9 +82,7 @@ export function FormImpor() {
           <span className="text-[15px] font-semibold text-hijau-900">
             {berkas ? berkas.name : "Klik untuk memilih berkas DATA_TB.xlsx"}
           </span>
-          <span className="text-sm text-gray-500">
-            {berkas ? `${(berkas.size / 1024).toFixed(0)} KB` : "Format .xlsx, maksimal 4 MB"}
-          </span>
+          {berkas && <span className="text-sm text-gray-500">{`${(berkas.size / 1024).toFixed(0)} KB`}</span>}
           <input
             ref={masukan}
             type="file"
@@ -234,7 +232,7 @@ function Pratinjau({
   return (
     <>
       <Kartu>
-        <JudulKartu keterangan={`Sheet "${p.namaSheet}", judul kolom di baris ${p.barisJudul}.`}>
+        <JudulKartu>
           2. Hasil pemeriksaan: {p.namaBerkas}
         </JudulKartu>
         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
@@ -250,13 +248,6 @@ function Pratinjau({
             <KotakInfo nada="peringatan">
               Kolom tidak ditemukan di berkas (akan dibiarkan kosong untuk orang baru): {p.kolomHilang.join(", ")}.
             </KotakInfo>
-          )}
-          {p.kolomTidakDikenal.length > 0 && <p>Kolom yang diabaikan: {p.kolomTidakDikenal.join(", ")}.</p>}
-          <p>Kolom hasil hitung (Akhir efektif s.d. Cek data) tidak diimpor; aplikasi menghitungnya sendiri.</p>
-          {p.tidakAdaDiBerkas > 0 && (
-            <p>
-              {p.tidakAdaDiBerkas} orang di aplikasi tidak ada di berkas ini. Mereka <b>tidak</b> diubah atau dihapus.
-            </p>
           )}
         </div>
       </Kartu>

@@ -30,7 +30,6 @@ export default function HalamanLog({ searchParams }: PageProps<"/log">) {
     <>
       <JudulHalaman
         judul="Log Aktivitas"
-        keterangan="Riwayat perubahan data dan akses ke aplikasi. Log hanya bisa dibaca; tidak bisa diubah atau dihapus dari aplikasi."
       />
       <Suspense fallback={<MemuatData baris={10} />}>
         <IsiLog searchParams={searchParams} />

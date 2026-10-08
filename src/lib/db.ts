@@ -11,7 +11,11 @@ function buatPrisma() {
   if (!connectionString) {
     throw new Error('DATABASE_URL belum diisi. Salin ".env.example" menjadi ".env" lalu isi alamat database.');
   }
-  const pool = new Pool({ connectionString, max: 5 });
+  // Koneksi menganggur dibuang cepat: database serverless (Neon) menutup koneksi yang lama diam,
+  // dan koneksi mati yang masih disimpan akan membuat permintaan berikutnya gagal.
+  const pool = new Pool({ connectionString, max: 5, idleTimeoutMillis: 10_000, connectionTimeoutMillis: 15_000 });
+  // Koneksi menganggur yang terputus bukan kesalahan fatal; pool akan membuat koneksi baru.
+  pool.on("error", (e) => console.warn("Koneksi database menganggur terputus, akan dibuat ulang:", e.message));
   // Di Vercel: koneksi yang menganggur ditutup rapi sebelum fungsi berhenti (tidak berpengaruh di komputer lokal).
   if (process.env.VERCEL) attachDatabasePool(pool);
   return new PrismaClient({ adapter: new PrismaPg(pool) });

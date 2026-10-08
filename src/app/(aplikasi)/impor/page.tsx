@@ -14,7 +14,6 @@ export default function HalamanImpor() {
     <>
       <JudulHalaman
         judul="Impor dari Excel"
-        keterangan="Unggah DATA_TB.xlsx untuk memasukkan orang baru atau memperbarui data yang sudah ada."
         aksi={
           <TombolTautan href="/data-tb/ekspor" prefetch={false}>
             Ekspor Data TB ke Excel

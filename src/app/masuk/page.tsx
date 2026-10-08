@@ -12,8 +12,7 @@ export default function HalamanMasuk() {
           <p className="text-krem-200">Monitor TB</p>
         </div>
         <div className="rounded-2xl bg-white p-6 shadow-xl sm:p-8">
-          <h2 className="text-xl font-semibold text-hijau-900">Masuk</h2>
-          <p className="mt-1 mb-6 text-sm text-gray-600">Khusus admin SDM. Data berisi NIP dan data kepegawaian.</p>
+          <h2 className="mb-6 text-xl font-semibold text-hijau-900">Masuk</h2>
           <Suspense>
             <FormMasuk />
           </Suspense>

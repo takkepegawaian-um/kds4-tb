@@ -18,7 +18,7 @@ const PER_HALAMAN = 50;
 export default function HalamanDataTb({ searchParams }: PageProps<"/data-tb">) {
   return (
     <>
-      <JudulHalaman judul="Data TB" keterangan="Semua pegawai Tugas Belajar, termasuk arsip (Sudah PK, Lulus, Rencana studi)." />
+      <JudulHalaman judul="Data TB" />
       <Suspense fallback={<MemuatData baris={10} />}>
         <IsiDataTb searchParams={searchParams} />
       </Suspense>

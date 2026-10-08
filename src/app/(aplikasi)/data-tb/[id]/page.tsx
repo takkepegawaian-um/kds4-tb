@@ -85,7 +85,7 @@ async function IsiDetail({ params, searchParams }: { params: Promise<{ id: strin
       )}
 
       <Kartu>
-        <JudulKartu keterangan={`Dihitung per tanggal acuan ${formatTanggal(tanggalAcuan)}.`}>Hambatan dan saran tindakan</JudulKartu>
+        <JudulKartu>Hambatan dan saran tindakan</JudulKartu>
         {hasil.level === null ? (
           <p className="text-[15px] text-gray-600">
             Status akhir &quot;{pegawai.statusAkhir}&quot; termasuk arsip. Hambatan hanya dihitung untuk orang yang Sedang TB.

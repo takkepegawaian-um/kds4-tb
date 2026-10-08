@@ -144,7 +144,6 @@ export function FormPegawai({ id, awal, daftar, petaTahap, tahapKosong }: Props)
                   </label>
                   {masukan}
                   {galat[kolom] && <p className="mt-1 text-sm text-kritis-fg">{galat[kolom]}</p>}
-                  {def.bantuan && !galat[kolom] && <p className="mt-1 text-xs text-gray-500">{def.bantuan}</p>}
                   {kolom === "nip" && nipTidakBaku && (
                     <p className="mt-1 flex items-center gap-1 text-sm text-waspada-fg">
                       <AlertTriangle size={14} /> NIP berisi {isian.nip!.trim().length} karakter, biasanya 18 digit angka.
@@ -177,7 +176,7 @@ export function FormPegawai({ id, awal, daftar, petaTahap, tahapKosong }: Props)
 
       <Kartu className="sticky bottom-4 z-10 shadow-lg">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="hidden text-sm text-gray-600 sm:block"><span className="text-kritis-fg">*</span> wajib diisi. Setiap perubahan dicatat di riwayat.</p>
+          <span />
           <div className="flex w-full gap-3 sm:w-auto">
             <Link href={id ? `/data-tb/${id}` : "/data-tb"}
               className="inline-flex h-11 items-center rounded-lg border border-krem-300 bg-white px-5 text-[13px] font-semibold tracking-[0.08em] text-hijau-900 uppercase">

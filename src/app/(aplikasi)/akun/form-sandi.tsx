@@ -27,7 +27,6 @@ export function FormSandi({ panjangMin }: { panjangMin: number }) {
       <div>
         <label htmlFor="baru" className="mb-1 block text-sm font-medium text-gray-700">Kata sandi baru</label>
         <input id="baru" name="baru" type="password" autoComplete="new-password" minLength={panjangMin} required className={kelas} />
-        <p className="mt-1 text-xs text-gray-500">Minimal {panjangMin} karakter. Gunakan kalimat yang mudah Anda ingat.</p>
       </div>
       <div>
         <label htmlFor="ulang" className="mb-1 block text-sm font-medium text-gray-700">Ulangi kata sandi baru</label>

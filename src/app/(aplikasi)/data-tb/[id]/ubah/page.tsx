@@ -22,7 +22,7 @@ async function IsiForm({ params }: { params: Promise<{ id: string }> }) {
   const props = await siapkanForm(pegawai);
   return (
     <>
-      <JudulHalaman judul={`Ubah data: ${pegawai.nama}`} keterangan={`NIP ${pegawai.nip}. Setiap perubahan dicatat di riwayat.`} />
+      <JudulHalaman judul={`Ubah data: ${pegawai.nama}`} keterangan={`NIP ${pegawai.nip}`} />
       <FormPegawai id={pegawai.id} {...props} />
     </>
   );

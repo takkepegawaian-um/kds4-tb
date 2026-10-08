@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { JudulHalaman, JudulKartu, Kartu, KotakInfo, MemuatData } from "@/components/ui";
+import { JudulHalaman, JudulKartu, Kartu, MemuatData } from "@/components/ui";
 import { wajibLogin } from "@/lib/auth/sesi";
 import { prisma } from "@/lib/db";
 import { KATEGORI_PILIHAN, type KategoriPilihan } from "@/lib/pengaturan/bawaan";
@@ -22,7 +22,6 @@ export default function HalamanPengaturan() {
     <>
       <JudulHalaman
         judul="Pengaturan"
-        keterangan="Angka dan daftar yang dipakai untuk menghitung hambatan. Setiap perubahan dicatat di Log Aktivitas dan langsung berlaku di semua halaman."
       />
       <nav className="mb-6 flex flex-wrap gap-2" aria-label="Bagian pengaturan">
         {BAGIAN.map(([id, label]) => (
@@ -38,10 +37,10 @@ export default function HalamanPengaturan() {
   );
 }
 
-function Bagian({ id, judul, keterangan, children }: { id: string; judul: string; keterangan?: ReactNode; children: ReactNode }) {
+function Bagian({ id, judul, children }: { id: string; judul: string; children: ReactNode }) {
   return (
     <Kartu id={id} className="scroll-mt-20">
-      <JudulKartu keterangan={keterangan}>{judul}</JudulKartu>
+      <JudulKartu>{judul}</JudulKartu>
       {children}
     </Kartu>
   );
@@ -72,12 +71,8 @@ async function IsiPengaturan() {
 
   return (
     <div className="grid gap-6">
-      <KotakInfo>
-        Nilai bawaan diambil dari sheet &quot;Pengaturan&quot; di DATA_TB.xlsx. Setelah disimpan, aplikasi menampilkan dampaknya pada jumlah orang
-        Kritis, Waspada, Perhatian, dan Aman. Tombol <b>Kembalikan ke bawaan Excel</b> tersedia bila ingin mengulang.
-      </KotakInfo>
 
-      <Bagian id="parameter" judul="Parameter" keterangan="Ambang hari dan batas skor. Tanggal acuan diisi untuk simulasi (mis. tanggal rapat); kosongkan untuk memakai hari ini.">
+      <Bagian id="parameter" judul="Parameter">
         <FormParameter
           parameter={parameter
             .filter((p) => p.kunci !== "tanggalRekapResmi")
@@ -88,12 +83,11 @@ async function IsiPengaturan() {
       <Bagian
         id="aturan"
         judul="Aturan hambatan"
-        keterangan="Skor dasar, nama, dan saran tindakan tiap kode. Syarat setiap kode mengikuti rumus Excel dan ada di program (teruji). Kode yang dinonaktifkan dilewati; orangnya jatuh ke kode berikutnya yang terpenuhi."
       >
         <TabelAturan aturan={aturan} />
       </Bagian>
 
-      <Bagian id="status-sk" judul="Pemetaan Status SK" keterangan='Menentukan Tahap, Pihak penahan, dan "SK sudah terbit?" untuk setiap isian kolom Status SK. Urutan baris menentukan urutan di dropdown.'>
+      <Bagian id="status-sk" judul="Pemetaan Status SK">
         <TabelStatusSk
           baris={statusSk.map(({ statusSk: s, tahap, pihakPenahan, skTerbit }) => ({ statusSk: s, tahap, pihakPenahan, skTerbit }))}
           dipakai={dipakaiStatusSk}
@@ -104,7 +98,6 @@ async function IsiPengaturan() {
       <Bagian
         id="pilihan"
         judul="Daftar pilihan"
-        keterangan="Isi dropdown di form Data TB. Nilai yang masih dipakai data tidak bisa dihapus, hanya disembunyikan. Nilai bertanda gembok dipakai langsung oleh aturan hambatan."
       >
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {kategori.map((k) => (
@@ -120,18 +113,18 @@ async function IsiPengaturan() {
         </div>
       </Bagian>
 
-      <Bagian id="libur" judul="Hari libur nasional" keterangan="Dipakai untuk menghitung hari kerja (hambatan kode 6: batas 14 hari kerja sebelum kuliah).">
+      <Bagian id="libur" judul="Hari libur nasional">
         <KelolaLibur libur={hariLibur.map((h) => ({ tanggal: dariDb(h.tanggal)!, keterangan: h.keterangan }))} />
       </Bagian>
 
       <div id="rekap" className="grid scroll-mt-20 gap-6 xl:grid-cols-2">
-        <Bagian id="rekap-fakultas" judul="Rekap resmi TB dan TB Biaya Mandiri" keterangan="Angka rekap resmi per fakultas, dibandingkan dengan jumlah Sedang TB di Ringkasan.">
+        <Bagian id="rekap-fakultas" judul="Rekap resmi TB dan TB Biaya Mandiri">
           <FormRekapFakultas
             tanggal={tanggalRekap}
             baris={[...rekapFakultas].sort((a, b) => urutanFak.indexOf(a.fakultas) - urutanFak.indexOf(b.fakultas))}
           />
         </Bagian>
-        <Bagian id="rekap-sk" judul="Rekap penerbitan SK Tugas Belajar" keterangan='Baris yang dijumlahkan ke "Total sudah/belum terbit" ditampilkan di Ringkasan.'>
+        <Bagian id="rekap-sk" judul="Rekap penerbitan SK Tugas Belajar">
           <FormRekapSk baris={rekapSk} />
         </Bagian>
       </div>

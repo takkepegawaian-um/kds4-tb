@@ -33,7 +33,6 @@ export function GrafikBatang({
             {s.nama}
           </span>
         ))}
-        <span className="text-gray-400">· klik batang untuk melihat daftar orangnya</span>
       </figcaption>
 
       <ul className="space-y-2.5">
