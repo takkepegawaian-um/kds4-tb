@@ -17,6 +17,8 @@ import {
   kembalikanAturanBawaan,
   kembalikanParameterBawaan,
   kembalikanStatusSkBawaan,
+  pratinjauStatusSkKosong,
+  terapkanStatusSkKosong,
   simpanAturan,
   simpanParameter,
   simpanRekapFakultas,
@@ -27,6 +29,7 @@ import {
   ubahPilihan,
   type HasilPengaturan,
 } from "./aksi";
+import type { PratinjauIsiStatusSk } from "@/lib/data/isi-status-sk";
 
 // ---------------------------------------------------------------------------
 // Pembantu
@@ -525,6 +528,106 @@ export function FormRekapSk({ baris: awal }: { baris: { id: number; uraian: stri
         <Tombol type="button" onClick={() => setBaris((s) => [...s, { uraian: "", jumlah: "0", kelompok: null }])}><Plus size={16} /> Tambah baris</Tombol>
         <Tombol varian="utama" disabled={proses} onClick={() => jalankan(() => simpanRekapSk(baris))}>{proses ? "Menyimpan…" : "Simpan rekap SK"}</Tombol>
       </BarisTombol>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Perawatan data: isi Status SK yang kosong
+// ---------------------------------------------------------------------------
+
+export function IsiStatusSkKosong({ jumlah, pilihan }: { jumlah: number; pilihan: string[] }) {
+  const router = useRouter();
+  const [nilai, setNilai] = useState(pilihan.includes("TB Aktif") ? "TB Aktif" : (pilihan[0] ?? ""));
+  const [pratinjau, setPratinjau] = useState<PratinjauIsiStatusSk | null>(null);
+  const [pesan, setPesan] = useState<{ ok: boolean; teks: string } | null>(null);
+  const [proses, mulai] = useTransition();
+
+  const lihat = () =>
+    mulai(async () => {
+      setPesan(null);
+      const h = await pratinjauStatusSkKosong(nilai);
+      if (h.ok) setPratinjau(h.data);
+      else setPesan({ ok: false, teks: h.pesan });
+    });
+
+  const terapkan = () => {
+    if (!pratinjau || !window.confirm(`Isi Status SK "${pratinjau.nilai}" untuk ${pratinjau.jumlah} orang? Perubahan tercatat di Log Aktivitas.`)) return;
+    mulai(async () => {
+      const h = await terapkanStatusSkKosong(nilai);
+      setPesan({ ok: h.ok, teks: h.pesan });
+      if (h.ok) {
+        setPratinjau(null);
+        router.refresh();
+      }
+    });
+  };
+
+  return (
+    <div className="grid gap-4">
+      {pesan && (
+        <div role="status" className={clsx("flex items-start gap-2 rounded-lg px-4 py-3 text-sm font-medium", pesan.ok ? "bg-aman-bg/40 text-aman-fg" : "bg-kritis-bg/40 text-kritis-fg")}>
+          {pesan.ok ? <CheckCircle2 size={16} className="mt-0.5 shrink-0" /> : <XCircle size={16} className="mt-0.5 shrink-0" />} {pesan.teks}
+        </div>
+      )}
+      <div className="flex flex-wrap items-end gap-3">
+        <div>
+          <div className="mb-1 text-sm font-medium text-gray-700">Sedang TB dengan Status SK kosong</div>
+          <div className="text-3xl font-bold text-hijau-900 tabular-nums">{jumlah}</div>
+        </div>
+        <div>
+          <label htmlFor="isi-sk" className="mb-1 block text-sm font-medium text-gray-700">Isi dengan</label>
+          <select
+            id="isi-sk"
+            value={nilai}
+            onChange={(e) => {
+              setNilai(e.target.value);
+              setPratinjau(null);
+            }}
+            className={clsx(masukan(), "h-11")}
+          >
+            {pilihan.map((p) => (
+              <option key={p}>{p}</option>
+            ))}
+          </select>
+        </div>
+        <Tombol disabled={proses || jumlah === 0} onClick={lihat}>
+          {proses && !pratinjau ? "Menghitung…" : "Lihat dampak"}
+        </Tombol>
+      </div>
+
+      {pratinjau && (
+        <div className="grid gap-4 rounded-xl border border-krem-200 bg-krem-50 p-4">
+          <div className="text-[15px]">
+            <b>{pratinjau.jumlah} orang</b> akan diisi <b>{pratinjau.nilai}</b>
+            <span className="text-gray-600"> (tahap {pratinjau.tahap}, SK terbit: {pratinjau.skTerbit})</span>
+          </div>
+          <div className="flex flex-wrap gap-x-6 gap-y-1 text-[15px]">
+            {LEVEL.map((l) => (
+              <span key={l}>
+                {l} <b>{pratinjau.sebelum[l]}</b>
+                {pratinjau.sebelum[l] !== pratinjau.sesudah[l] && (
+                  <>
+                    {" "}→ <b className="text-hijau-900">{pratinjau.sesudah[l]}</b>
+                  </>
+                )}
+              </span>
+            ))}
+          </div>
+          <ul className="text-sm text-gray-700">
+            {pratinjau.perpindahan.map((g) => (
+              <li key={`${g.dari}-${g.ke}`}>
+                kode {g.dari} → kode {g.ke}: {g.jumlah} orang
+              </li>
+            ))}
+          </ul>
+          <div>
+            <Tombol varian="utama" disabled={proses} onClick={terapkan}>
+              {proses ? "Menyimpan…" : `Terapkan ke ${pratinjau.jumlah} orang`}
+            </Tombol>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

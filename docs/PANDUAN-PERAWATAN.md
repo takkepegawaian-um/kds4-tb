@@ -98,23 +98,19 @@ Ganti kata sandi biasa cukup lewat tombol **Kata sandi** di bawah sidebar.
 ## 4b. Mengisi Status SK yang kosong (sekali jalan)
 
 Pegawai Sedang TB yang Status SK-nya kosong masuk tahap "Belum dicatat" dan terkena hambatan
-kode 11. Untuk mengisinya sekaligus (bawaan: "TB Aktif"), jalankan **pratinjau dulu**:
+kode 11. Untuk mengisinya sekaligus tanpa terminal:
 
-```powershell
-$env:DATABASE_URL = "alamat LANGSUNG dari Neon"
-npm.cmd run isi-status-sk
-```
+1. Buka **Pengaturan → Perawatan data** (tombol di bagian atas halaman).
+2. Pilih nilai pengisi (bawaan **TB Aktif**), tekan **Lihat dampak**. Aplikasi menampilkan jumlah orang
+   dan perubahan jumlah Kritis/Waspada/Perhatian/Aman sebelum dan sesudah. **Belum ada yang disimpan.**
+3. Bila sesuai, tekan **Terapkan ke N orang** dan setujui konfirmasinya.
 
-Pratinjau menampilkan jumlah orang, dan perubahan jumlah Kritis/Waspada/Perhatian/Aman sebelum dan
-sesudah. **Belum ada yang disimpan.** Bila angkanya sesuai harapan, terapkan:
+Hanya orang berstatus akhir "Sedang TB" yang terpengaruh; arsip tidak disentuh. Setiap orang tercatat di
+Log Aktivitas (Status SK: kosong → TB Aktif). Tombol aman diulang: bila tidak ada lagi yang kosong,
+tidak ada yang berubah. Buat cadangan (bagian 1A) sebelum menerapkan.
 
-```powershell
-npm.cmd run isi-status-sk -- --simpan
-```
-
-Hanya orang berstatus akhir "Sedang TB" yang terpengaruh; arsip tidak disentuh. Setiap orang tercatat
-di Log Aktivitas (Status SK: kosong → TB Aktif). Buat cadangan (bagian 1A) sebelum menerapkan.
-Status SK lain bisa dipakai dengan `--nilai="IB Aktif"`.
+Alternatif lewat terminal (hasilnya sama): `npm.cmd run isi-status-sk` untuk pratinjau, dan
+`npm.cmd run isi-status-sk -- --simpan` untuk menerapkan.
 
 ## 5. Tugas berkala
 

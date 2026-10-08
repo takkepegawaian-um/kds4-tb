@@ -8,6 +8,7 @@ import { hitungSemua } from "@/lib/aturan/mesin";
 import { LEVEL, susunPengaturan, type Level } from "@/lib/aturan/pengaturan";
 import { prisma } from "@/lib/db";
 import { keInputAturan } from "@/lib/data/peta";
+import { pratinjauIsiStatusSk, terapkanIsiStatusSk, type PratinjauIsiStatusSk } from "@/lib/data/isi-status-sk";
 import { bacaTanggal } from "@/lib/excel/data-tb";
 import {
   ATURAN_HAMBATAN_BAWAAN,
@@ -366,4 +367,31 @@ export async function simpanRekapSk(
   });
   revalidatePath("/", "layout");
   return { ok: true, pesan: log.length ? `${log.length} perubahan rekap disimpan.` : "Tidak ada yang berubah." };
+}
+
+// ---------------------------------------------------------------------------
+// Perawatan data: isi Status SK yang kosong
+// ---------------------------------------------------------------------------
+
+export type HasilPratinjauSk = { ok: true; data: PratinjauIsiStatusSk } | { ok: false; pesan: string };
+
+export async function pratinjauStatusSkKosong(nilai: string): Promise<HasilPratinjauSk> {
+  await emailPengguna();
+  try {
+    return { ok: true, data: await pratinjauIsiStatusSk(nilai) };
+  } catch (e) {
+    return { ok: false, pesan: e instanceof Error ? e.message : "Terjadi kesalahan yang tidak dikenal." };
+  }
+}
+
+export async function terapkanStatusSkKosong(nilai: string): Promise<{ ok: boolean; pesan: string; jumlah?: number }> {
+  // Di luar try: bila belum login, redirect ke halaman Masuk tidak boleh tertangkap catch.
+  const email = await emailPengguna();
+  try {
+    const jumlah = await terapkanIsiStatusSk(nilai, email);
+    revalidatePath("/", "layout");
+    return { ok: true, jumlah, pesan: jumlah ? `${jumlah} orang diisi Status SK "${nilai}".` : "Tidak ada Status SK kosong yang perlu diisi." };
+  } catch (e) {
+    return { ok: false, pesan: e instanceof Error ? e.message : "Terjadi kesalahan yang tidak dikenal." };
+  }
 }

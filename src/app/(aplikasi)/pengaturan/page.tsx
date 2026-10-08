@@ -6,7 +6,8 @@ import { KATEGORI_PILIHAN, type KategoriPilihan } from "@/lib/pengaturan/bawaan"
 import { semuaPengaturan } from "@/lib/pengaturan/baca";
 import { KOLOM_KATEGORI, STATUS_SK_SISTEM } from "@/lib/pengaturan/validasi";
 import { dariDb } from "@/lib/tanggal";
-import { FormParameter, FormRekapFakultas, FormRekapSk, KelolaLibur, KelolaPilihan, TabelAturan, TabelStatusSk } from "./bagian";
+import { hitungStatusSkKosong } from "@/lib/data/isi-status-sk";
+import { FormParameter, FormRekapFakultas, FormRekapSk, IsiStatusSkKosong, KelolaLibur, KelolaPilihan, TabelAturan, TabelStatusSk } from "./bagian";
 
 const BAGIAN = [
   ["parameter", "Parameter"],
@@ -15,6 +16,7 @@ const BAGIAN = [
   ["pilihan", "Daftar pilihan"],
   ["libur", "Hari libur"],
   ["rekap", "Rekap manual"],
+  ["perawatan", "Perawatan data"],
 ] as const;
 
 export default function HalamanPengaturan() {
@@ -66,6 +68,7 @@ async function IsiPengaturan() {
       .filter((g) => String(g[KOLOM_KATEGORI[k]] ?? "").toLowerCase() === nilai.toLowerCase())
       .reduce((t, g) => t + g._count, 0);
   };
+  const jumlahSkKosong = await hitungStatusSkKosong();
   const urutanFak = pilihan.filter((p) => p.kategori === "FAKULTAS").map((p) => p.nilai);
   const tanggalRekap = parameter.find((p) => p.kunci === "tanggalRekapResmi")?.nilai ?? "";
 
@@ -128,6 +131,10 @@ async function IsiPengaturan() {
           <FormRekapSk baris={rekapSk} />
         </Bagian>
       </div>
+
+      <Bagian id="perawatan" judul="Perawatan data: isi Status SK yang kosong">
+        <IsiStatusSkKosong jumlah={jumlahSkKosong} pilihan={statusSk.map((s) => s.statusSk)} />
+      </Bagian>
     </div>
   );
 }
