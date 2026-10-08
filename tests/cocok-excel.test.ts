@@ -322,7 +322,8 @@ describe.skipIf(!adaExcel)("Pencocokan dengan DATA_TB.xlsx", () => {
         catatan: barisExcel[i].nilai.catatan,
       } as PegawaiTB,
     }));
-    const { hasil: daftar } = pilihPerhatian(barisPerhatian, {});
+    // Sheet Excel diurutkan menurut peringkat; urutan bawaan aplikasi kini sisa hari, jadi diminta eksplisit.
+    const { hasil: daftar } = pilihPerhatian(barisPerhatian, { urut: "peringkat" });
 
     // Baris Excel yang terisi (kolom Peringkat di A6:A330 selalu berisi angka; Nama kosong = tidak ada orang).
     const isiExcel: unknown[][] = [];
