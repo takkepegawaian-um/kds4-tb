@@ -18,6 +18,10 @@ Untuk admin SDM yang memakai aplikasi sehari-hari.
 - Saring per **fakultas** atau **jenis**, atau isi **tanggal acuan (simulasi)** untuk melihat
   kondisi pada tanggal tertentu (mis. tanggal rapat).
 
+Urutan bawaan daftar (Data TB dan Daftar Perhatian) adalah **sisa hari, tersedikit dulu**: yang masa TB-nya
+sudah lewat paling atas. Judul kolom tetap terlihat saat tabel digulir. Urutan lain bisa dipilih lewat
+kotak **Urutkan**.
+
 ### 2. Menyiapkan rapat — menu **Daftar Perhatian**
 
 1. Isi **Tanggal acuan (simulasi)** dengan tanggal rapat (bila perlu), saring fakultas/level.

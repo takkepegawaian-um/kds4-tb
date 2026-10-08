@@ -154,9 +154,9 @@ async function IsiDaftar({ searchParams }: { searchParams: Promise<Parameter> })
         <Kartu><p className="text-[15px] text-gray-600">Tidak ada orang berhambatan yang cocok dengan saringan ini.</p></Kartu>
       ) : (
         <>
-          <div className="hidden overflow-x-auto rounded-xl border border-krem-200 bg-white lg:block">
+          <div className="hidden max-h-[75vh] overflow-auto rounded-xl border border-krem-200 bg-white lg:block">
             <table className="w-full text-sm">
-              <thead className="border-b border-krem-200 bg-krem-50">
+              <thead className="sticky top-0 z-10 bg-krem-50 shadow-[0_1px_0_var(--color-krem-200)]">
                 <tr className="text-left text-xs font-semibold tracking-[0.06em] text-gray-500 uppercase">
                   <th className="w-10 px-3 py-3 text-right">#</th>
                   <th className="px-3 py-3">Nama / NIP</th>

@@ -95,6 +95,27 @@ git push
 
 Ganti kata sandi biasa cukup lewat tombol **Kata sandi** di bawah sidebar.
 
+## 4b. Mengisi Status SK yang kosong (sekali jalan)
+
+Pegawai Sedang TB yang Status SK-nya kosong masuk tahap "Belum dicatat" dan terkena hambatan
+kode 11. Untuk mengisinya sekaligus (bawaan: "TB Aktif"), jalankan **pratinjau dulu**:
+
+```powershell
+$env:DATABASE_URL = "alamat LANGSUNG dari Neon"
+npm.cmd run isi-status-sk
+```
+
+Pratinjau menampilkan jumlah orang, dan perubahan jumlah Kritis/Waspada/Perhatian/Aman sebelum dan
+sesudah. **Belum ada yang disimpan.** Bila angkanya sesuai harapan, terapkan:
+
+```powershell
+npm.cmd run isi-status-sk -- --simpan
+```
+
+Hanya orang berstatus akhir "Sedang TB" yang terpengaruh; arsip tidak disentuh. Setiap orang tercatat
+di Log Aktivitas (Status SK: kosong → TB Aktif). Buat cadangan (bagian 1A) sebelum menerapkan.
+Status SK lain bisa dipakai dengan `--nilai="IB Aktif"`.
+
 ## 5. Tugas berkala
 
 | Kapan | Tugas |

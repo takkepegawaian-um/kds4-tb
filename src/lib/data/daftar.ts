@@ -20,7 +20,7 @@ export type Urut = keyof typeof PILIHAN_URUT;
 
 const satu = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-export function bacaUrut(p: Parameter, bawaan: Urut = "urutan"): Urut {
+export function bacaUrut(p: Parameter, bawaan: Urut = "sisa"): Urut {
   const u = satu(p.urut);
   return u && u in PILIHAN_URUT ? (u as Urut) : bawaan;
 }

@@ -10,7 +10,7 @@ import { pilihBaris, type Parameter } from "./daftar";
 export type BarisPerhatian = BarisDihitung & { pegawai: PegawaiTB };
 
 export function pilihPerhatian(baris: readonly BarisPerhatian[], p: Parameter) {
-  return pilihBaris(baris, p, { urutBawaan: "peringkat", wajib: { berhambatan: true } });
+  return pilihBaris(baris, p, { urutBawaan: "sisa", wajib: { berhambatan: true } });
 }
 
 export type KolomPerhatian = {
