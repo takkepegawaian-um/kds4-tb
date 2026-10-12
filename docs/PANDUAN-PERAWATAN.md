@@ -133,7 +133,31 @@ Alternatif lewat terminal (hasilnya sama): `npm.cmd run isi-status-sk` untuk pra
 | Angka Ringkasan berbeda dengan Excel | Periksa tanggal acuan (hari ini vs. simulasi) dan Pengaturan (bandingkan dengan nilai bawaan / Log Aktivitas). Jalankan `npm run uji:excel` di komputer. |
 | Hari kerja tidak memperhitungkan libur | Hari libur belum diisi di Pengaturan. |
 
-## 7. Uji coba di komputer sendiri
+## 7. Mengubah templat SK
+
+Templat konsep SK ada di folder `src/lib/sk/templat/` (berkas Word `.docx`):
+
+| Berkas | SK |
+|---|---|
+| `tb-beasiswa.docx` | Pemberian Tugas Belajar (beasiswa) |
+| `tb-mandiri.docx` | Pemberian Tugas Belajar (biaya mandiri) |
+| `perpanjangan-tb.docx` | Perpanjangan Tugas Belajar |
+| `hukdis-ringan.docx` | Hukuman disiplin ringan |
+| `hukdis-sedang.docx` | Hukuman disiplin sedang |
+
+Cara mengubah (mis. memperbarui dasar hukum "Mengingat" atau kop surat):
+
+1. Buka berkasnya di Word. Bagian yang diisi aplikasi tampak sebagai tulisan dalam kurung kurawal,
+   mis. `{nama}`, `{tmt}`, `{pasal}`.
+2. Ubah tulisan biasa sesuka Anda. **Jangan mengubah, menghapus, atau mengetik ulang** tulisan di dalam
+   kurung kurawal. Penanda baru tidak bisa ditambah tanpa pengembang karena harus punya isian di formulir.
+3. Simpan (tetap format `.docx`, nama berkas sama), timpa berkas lama, lalu `npm test` dan `git push`.
+   Tes memeriksa bahwa semua penanda masih punya isian dan bahwa tidak ada data pribadi di templat.
+
+Templat memuat `{penanda}` saja; jangan menaruh nama atau NIP asli pegawai di dalamnya. Bila menambah jenis SK
+baru, kirimkan contohnya ke pengembang.
+
+## 8. Uji coba di komputer sendiri
 
 Lihat README bagian *Menjalankan di komputer sendiri*. Database uji coba lokal dinyalakan
 dengan `npm run db:lokal` dan terpisah sepenuhnya dari database produksi.

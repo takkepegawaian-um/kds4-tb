@@ -5,6 +5,10 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   // pdfmake membaca data font standar dari node_modules saat berjalan; jangan dibundel.
   serverExternalPackages: ["pdfmake"],
+  // Templat Word SK dibaca dari berkas saat berjalan; pastikan ikut terpasang di Vercel.
+  outputFileTracingIncludes: {
+    "/sk/unduh": ["./src/lib/sk/templat/**/*"],
+  },
   experimental: {
     // Unggahan berkas Excel lewat Server Action (batas Vercel 4,5 MB).
     serverActions: { bodySizeLimit: "4mb" },

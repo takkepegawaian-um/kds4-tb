@@ -54,3 +54,6 @@ next-env.d.ts
 /Template SK/
 *.docx
 *.doc
+
+# Templat SK bawaan aplikasi (tanpa data pribadi) harus ikut ke GitHub
+!/src/lib/sk/templat/*.docx

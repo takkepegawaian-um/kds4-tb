@@ -62,6 +62,41 @@ Sebaran), dan rekap manual.
 Setelah menyimpan, aplikasi menunjukkan dampaknya (mis. "Waspada 91 → 112"). Bila ragu, tekan
 **Kembalikan ke bawaan Excel**. Semua perubahan tercatat di Log Aktivitas.
 
+## Membuat konsep SK — menu **Buat SK**
+
+Aplikasi mengisi templat Word dengan data yang Anda masukkan, lalu mengunduhnya sebagai **berkas Word
+(.docx)**. Kop surat, huruf, dan tata letak sama persis dengan contoh SK. Hasilnya adalah **konsep**:
+periksa isinya di Word, isi nomor urut, lalu cetak dan tanda tangan seperti biasa.
+
+| SK | Penandatangan |
+|---|---|
+| Pemberian Tugas Belajar (beasiswa) | Rektor |
+| Pemberian Tugas Belajar (biaya mandiri) | Rektor |
+| Perpanjangan Tugas Belajar | Rektor |
+| Hukuman disiplin ringan | Dekan |
+| Hukuman disiplin sedang | Rektor |
+
+1. Buka **Buat SK** dan pilih jenis SK.
+2. Bila orangnya ada di Data TB, ketik nama atau NIP di **Ambil dari Data TB** dan pilih. Nama, NIP,
+   fakultas, tempat studi, dan tanggal studi terisi otomatis. Semua isian tetap bisa diubah.
+   Untuk orang yang tidak ada di Data TB (mis. hukuman disiplin), isi semuanya langsung.
+3. Lengkapi isian yang masih kosong. Tanda `*` berarti wajib. Tanggal ditulis dd/mm/yyyy (boleh 8 angka).
+4. Tekan **Unduh konsep SK**. Isian yang dikosongkan ditulis `……`, seperti pada contoh SK.
+
+Yang dihitung otomatis: nama pada judul (huruf kapital), lama studi ("3 (tiga) tahun"), tanggal ditulis
+Indonesia ("10 September 2026"), dan pada perpanjangan, tanggal mulai (sehari setelah masa TB sebelumnya).
+
+**Nomor SK** dikosongkan dulu. Bila "Ditetapkan pada tanggal" diisi, nomornya tertulis mengikuti pola contoh
+(mis. `10.9.      /UN32/KP/2026`), dengan nomor urut dibiarkan kosong untuk diisi di Word. Bila nomor lengkap
+sudah ada, ketik di kolom Nomor SK.
+
+Perlu diketahui:
+- **Isi SK tidak disimpan** di aplikasi. Yang tercatat di Log Aktivitas (Log akses) hanya "SK dibuat" dan jenisnya.
+- Aplikasi **tidak menentukan** pasal, uraian pelanggaran, atau hukuman. Isian itu Anda tulis sendiri sesuai
+  hasil pemeriksaan, dan konsep harus ditinjau pihak yang berwenang sebelum ditandatangani.
+- **Dasar hukum (Mengingat)** sudah tertulis di templat. Bila ada peraturan baru, ubah templatnya
+  (lihat Panduan perawatan bagian 7).
+
 ## Sebaran: sumber biaya dan kampus tujuan
 
 Di **Ringkasan**, di atas "Hambatan yang terdeteksi", ada dua kartu. Semuanya menghitung orang

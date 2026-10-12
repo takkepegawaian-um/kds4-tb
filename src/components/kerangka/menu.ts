@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  FilePen,
   FileUp,
   History,
   LayoutDashboard,
@@ -24,6 +25,7 @@ export const MENU: KelompokMenu[] = [
     item: [
       { href: "/data-tb", label: "Data TB", ikon: Users },
       { href: "/impor", label: "Impor dari Excel", ikon: FileUp },
+      { href: "/sk", label: "Buat SK", ikon: FilePen },
     ],
   },
   {

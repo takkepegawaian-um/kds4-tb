@@ -18,6 +18,7 @@ export const LABEL_PERISTIWA: Record<string, string> = {
   AKUN_TERKUNCI: "Akun dikunci",
   LOGOUT: "Keluar",
   EKSPOR: "Ekspor data",
+  SK_DIBUAT: "SK dibuat (konsep)",
   GANTI_SANDI: "Ganti kata sandi",
   GANTI_SANDI_GAGAL: "Gagal ganti kata sandi",
   KELUAR_SEMUA_PERANGKAT: "Keluarkan perangkat lain",
