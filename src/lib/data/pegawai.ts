@@ -5,7 +5,9 @@ import type { PegawaiTB } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { hitungSemua } from "@/lib/aturan/mesin";
 import type { BarisDihitung } from "@/lib/aturan/saringan";
+import { kelompokkan } from "@/lib/aturan/sebaran";
 import { keInputAturan } from "./peta";
+import { muatPembakuan } from "./pembakuan";
 export { dbKeNilai, keInputAturan, nilaiKeDb } from "./peta";
 import { wajibLogin } from "@/lib/auth/sesi";
 import { pengaturanAturan, tanggalAcuanBerlaku } from "@/lib/pengaturan/baca";
@@ -17,13 +19,19 @@ import { pengaturanAturan, tanggalAcuanBerlaku } from "@/lib/pengaturan/baca";
 export async function muatSemuaDihitung(tanggalAcuan?: string) {
   await connection();
   await wajibLogin();
-  const [pegawai, pengaturan, acuan] = await Promise.all([
+  const [pegawai, pengaturan, acuan, pembakuan] = await Promise.all([
     prisma.pegawaiTB.findMany({ where: { dihapusPada: null }, orderBy: { urutan: "asc" } }),
     pengaturanAturan(),
     tanggalAcuan ? Promise.resolve({ tanggal: tanggalAcuan, simulasi: true }) : tanggalAcuanBerlaku(),
+    muatPembakuan(),
   ]);
   const input = pegawai.map(keInputAturan);
   const hasil = hitungSemua(input, pengaturan, acuan.tanggal);
-  const baris: (BarisDihitung & { pegawai: PegawaiTB })[] = pegawai.map((p, i) => ({ pegawai: p, input: input[i], hasil: hasil[i] }));
+  const baris: (BarisDihitung & { pegawai: PegawaiTB })[] = pegawai.map((p, i) => ({
+    pegawai: p,
+    input: input[i],
+    hasil: hasil[i],
+    kelompok: kelompokkan(p.sumberBiaya, p.tempatStudi, pembakuan),
+  }));
   return { baris, pengaturan, tanggalAcuan: acuan.tanggal };
 }

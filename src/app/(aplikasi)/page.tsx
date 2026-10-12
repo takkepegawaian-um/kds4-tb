@@ -8,10 +8,12 @@ import { connection } from "next/server";
 import { AlertOctagon, AlertTriangle, CheckCircle2, ChevronDown, Info, Users, X } from "lucide-react";
 import clsx from "clsx";
 import { GrafikBatang } from "@/components/grafik-batang";
+import { GrafikPie } from "@/components/grafik-pie";
 import { JudulHalaman, JudulKartu, Kartu, MemuatData } from "@/components/ui";
 import type { Level } from "@/lib/aturan/pengaturan";
 import { hitungRekapResmi, hitungRingkasan, type PerJenis } from "@/lib/aturan/ringkasan";
-import type { Angka, Saringan } from "@/lib/aturan/saringan";
+import { KOSONG, type Angka, type Saringan } from "@/lib/aturan/saringan";
+import { NEGARA_DALAM_NEGERI } from "@/lib/aturan/sebaran";
 import { tautanDaftar } from "@/lib/aturan/saringan-url";
 import { wajibLogin } from "@/lib/auth/sesi";
 import { prisma } from "@/lib/db";
@@ -23,6 +25,9 @@ import { formatTanggal } from "@/lib/tanggal";
 // Warna seri (sudah diuji dengan validator palet: lolos uji buta warna dan kontras).
 const WARNA_BEBAS = "#0f8a63";
 const WARNA_TETAP = "#b98424";
+// Beasiswa/Mandiri sudah diuji validator palet; abu-abu = belum ada kategori (bukan seri data).
+const WARNA_BIAYA: Record<string, string> = { Beasiswa: "#6d5bb5", Mandiri: "#2a93b8", "Belum jelas": "#9aa3ad", "Belum dikelompokkan": "#cfd4da" };
+const WARNA_KAMPUS = "#5b6770";
 const WARNA_LEVEL: Record<Exclude<Level, "Aman">, string> = { Kritis: "#d93a3a", Waspada: "#e0a800", Perhatian: "#3a78c2" };
 
 type Parameter = Record<string, string | string[] | undefined>;
@@ -95,6 +100,12 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
     { seri: "Bebas", nilai: pj.bebas.jumlah, href: href(pj.bebas.saringan) },
     { seri: "Tetap", nilai: pj.tetap.jumlah, href: href(pj.tetap.saringan) },
   ];
+
+  const sb = r.sebaran;
+  const irisanBiaya = (xs: typeof sb.biayaBebas) =>
+    xs.map((x) => ({ nama: x.nama, nilai: x.angka.jumlah, href: href(x.angka.saringan), warna: WARNA_BIAYA[x.nama] }));
+  const kampusTeratas = sb.kampus.filter((k) => k.nama !== KOSONG).slice(0, 10);
+  const namaNegara = (n: string | null) => (n === null || n === KOSONG ? "Belum diketahui" : n);
 
   const th = "px-3 py-2 text-left text-xs font-semibold tracking-[0.06em] text-gray-500 uppercase";
   const thK = `${th} text-right`;
@@ -275,6 +286,80 @@ async function IsiDashboard({ searchParams }: { searchParams: Promise<Parameter>
             }))}
           />
         </div>
+      </Kartu>
+
+      {/* Sebaran: Bebas/Tetap, sumber biaya */}
+      <Kartu className="p-4">
+        <JudulKartu>Sebaran</JudulKartu>
+        <div className="grid gap-x-8 gap-y-6 lg:grid-cols-3">
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-gray-700">Bebas dan Tetap TriDharma</h3>
+            <GrafikPie
+              judul="Bebas dan Tetap TriDharma"
+              irisan={sb.jenis.map((x) => ({ nama: x.nama, nilai: x.angka.jumlah, href: href(x.angka.saringan), warna: x.nama === "Bebas" ? WARNA_BEBAS : WARNA_TETAP }))}
+            />
+          </div>
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-gray-700">Bebas TriDharma: sumber biaya</h3>
+            <GrafikPie judul="Bebas TriDharma: sumber biaya" irisan={irisanBiaya(sb.biayaBebas)} sembunyikanNol={["Belum dikelompokkan"]} />
+          </div>
+          <div>
+            <h3 className="mb-3 text-sm font-semibold text-gray-700">Tetap TriDharma: sumber biaya</h3>
+            <GrafikPie judul="Tetap TriDharma: sumber biaya" irisan={irisanBiaya(sb.biayaTetap)} sembunyikanNol={["Belum dikelompokkan"]} />
+          </div>
+        </div>
+        {[...sb.biayaBebas, ...sb.biayaTetap].some((x) => x.nama === "Belum dikelompokkan" && x.angka.jumlah > 0) && (
+          <p className="mt-4 text-sm text-gray-600">
+            Ada sumber biaya yang belum dikelompokkan.{" "}
+            <Link href="/pengaturan#pembakuan" className="font-semibold text-hijau-900 underline">Atur di Pengaturan</Link>
+          </p>
+        )}
+      </Kartu>
+
+      {/* Sebaran: kampus tujuan */}
+      <Kartu className="p-4">
+        <JudulKartu>Kampus tujuan</JudulKartu>
+        <div className="grid gap-x-8 gap-y-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+          <GrafikBatang
+            judul="Kampus"
+            seri={[{ nama: "Sedang TB", warna: WARNA_KAMPUS }]}
+            baris={kampusTeratas.map((k) => ({
+              label: k.negara && k.negara !== NEGARA_DALAM_NEGERI ? `${k.nama} · ${k.negara}` : k.nama,
+              segmen: [{ seri: "Sedang TB", nilai: k.angka.jumlah, href: href(k.angka.saringan) }],
+              hrefTotal: href(k.angka.saringan),
+            }))}
+          />
+          <div>
+            <h3 className="mb-2 text-xs font-semibold tracking-[0.06em] text-gray-500 uppercase">Negara</h3>
+            <ul className="columns-2 gap-x-6 text-[14px]">
+              {sb.negara.map((n) => (
+                <li key={n.nama} className="flex break-inside-avoid items-baseline justify-between gap-2 border-b border-krem-100 py-1.5">
+                  <span className={n.nama === KOSONG ? "text-gray-500 italic" : undefined}>{namaNegara(n.nama)}</span>
+                  <TautanAngka acuan={acuan} a={n.angka} className="tabular-nums" />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <details className="group mt-5 text-sm">
+          <summary className="flex cursor-pointer list-none items-center gap-1 font-medium text-hijau-700">
+            Semua kampus ({sb.kampus.length}) <ChevronDown size={16} className="transition-transform group-open:rotate-180" />
+          </summary>
+          <div className="mt-2 max-h-96 overflow-auto">
+            <table className="w-full">
+              <thead className="sticky top-0 border-b border-krem-200 bg-white"><tr><th className={th}>Kampus</th><th className={th}>Negara</th><th className={thK}>Orang</th></tr></thead>
+              <tbody className="divide-y divide-krem-100">
+                {sb.kampus.map((k) => (
+                  <tr key={k.nama}>
+                    <td className={td}>{k.nama === KOSONG ? <span className="text-gray-500 italic">Belum diisi</span> : k.nama}</td>
+                    <td className={`${td} text-gray-600`}>{k.negara ?? "–"}</td>
+                    <td className={tdK}><TautanAngka acuan={acuan} a={k.angka} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
       </Kartu>
 
       {/* 4. Hambatan (grafik) | status akhir, pihak penahan, tahap */}

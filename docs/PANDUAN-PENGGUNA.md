@@ -57,9 +57,38 @@ Tips pengisian:
 
 ### 6. Mengubah aturan — menu **Pengaturan**
 
-Ambang hari, skor, batas level, Status SK, daftar pilihan, hari libur, dan rekap manual.
+Ambang hari, skor, batas level, Status SK, daftar pilihan, hari libur, pembakuan data (untuk diagram
+Sebaran), dan rekap manual.
 Setelah menyimpan, aplikasi menunjukkan dampaknya (mis. "Waspada 91 → 112"). Bila ragu, tekan
 **Kembalikan ke bawaan Excel**. Semua perubahan tercatat di Log Aktivitas.
+
+## Sebaran: sumber biaya dan kampus tujuan
+
+Di **Ringkasan**, di atas "Hambatan yang terdeteksi", ada dua kartu. Semuanya menghitung orang
+**Sedang TB** dan ikut filter fakultas atau jenis di bagian atas halaman.
+
+- **Sebaran:** tiga diagram lingkaran, yaitu Bebas vs Tetap TriDharma, lalu sumber biaya (Beasiswa,
+  Mandiri, Belum jelas) untuk Bebas dan untuk Tetap TriDharma.
+- **Kampus tujuan:** 10 kampus terbanyak, daftar negara, dan tabel **Semua kampus**.
+- Klik irisan, batang, atau angka untuk melihat daftar orangnya di Data TB.
+
+Kolom *Sumber biaya* dan *Tempat studi* di Data TB berisi tulisan bebas, mis. "Sendiri", "Mandiri",
+"UGM", "Universitas Gadjah Mada Yogyakarta". Supaya bisa dihitung, tulisan itu diterjemahkan lewat
+**Pengaturan → Pembakuan data**. Isi Data TB sendiri tidak pernah berubah.
+
+| Bagian | Yang diatur |
+|---|---|
+| Sumber biaya | Pilih kelompok tiap tulisan: **Beasiswa**, **Mandiri**, atau **Belum jelas** |
+| Tempat studi | Isi **nama kampus baku** dan **negara** (beberapa tulisan boleh dijadikan satu nama) |
+
+- Awalnya sudah terisi dari tulisan yang ada di DATA_TB.xlsx. Bawaannya menganggap "Sendiri" dan
+  "Mandiri" sebagai Mandiri, "UM" sebagai Beasiswa, dan isian ganda seperti "UM/mandiri" sebagai Belum jelas.
+- Tulisan baru (mis. dari orang yang baru ditambahkan) tampil sebagai **Belum dikelompokkan** sampai
+  Anda memilihkan kelompoknya. Di Ringkasan muncul peringatan dengan tautan ke Pengaturan.
+- Kosongkan kelompok atau nama baku untuk menghapus padanan sebuah tulisan.
+- Perubahan tercatat di Log Aktivitas.
+- Daftar di Pengaturan hanya memuat tulisan milik orang yang sedang TB. Isian pegawai arsip
+  (Sudah PK, Lulus, Rencana studi) tidak perlu dirapikan.
 
 ## Status absensi (khusus Bebas TriDharma)
 

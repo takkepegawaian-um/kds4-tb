@@ -171,6 +171,21 @@ model RekapPenerbitanSk {
   kelompok String? // "SUDAH_TERBIT" | "BELUM_TERBIT" | null
 }
 
+// Pembakuan tulisan bebas di Data TB supaya bisa dihitung di diagram Sebaran.
+//   jenis BIAYA : asli = isi kolom Sumber biaya, baku = Beasiswa | Mandiri | Belum jelas
+//   jenis KAMPUS: asli = isi kolom Tempat studi, baku = nama kampus baku, negara = negaranya
+// Isi Data TB sendiri tidak pernah diubah. Tulisan yang tidak ada di tabel ini
+// tampil sebagai "Belum dikelompokkan".
+model PembakuanNilai {
+  id     Int     @id @default(autoincrement())
+  jenis  String
+  asli   String
+  baku   String
+  negara String?
+
+  @@unique([jenis, asli])
+}
+
 // ---------------------------------------------------------------------------
 // Log
 // ---------------------------------------------------------------------------

@@ -5,7 +5,10 @@
 import { NILAI, sama, type HasilPegawai, type InputPegawai } from "./mesin";
 import type { Level } from "./pengaturan";
 
-export type BarisDihitung = { input: InputPegawai; hasil: HasilPegawai };
+/** Pengelompokan sumber biaya dan kampus (lihat sebaran.ts). Hanya ada bila pembakuan dimuat. */
+export type Kelompok = { biaya: string; kampus: string; negara: string | null };
+
+export type BarisDihitung = { input: InputPegawai; hasil: HasilPegawai; kelompok?: Kelompok };
 
 export type Saringan = {
   /** true = hanya Sedang TB; false = hanya selain Sedang TB (arsip) */
@@ -36,6 +39,12 @@ export type Saringan = {
   q?: string;
   /** Jenis pelaksanaan Bebas atau Tetap (terisi) */
   jenisTerisi?: boolean;
+  /** Kelompok sumber biaya: Beasiswa, Mandiri, Belum jelas, atau Belum dikelompokkan */
+  biaya?: string;
+  /** Nama kampus baku; KOSONG = tempat studi belum diisi */
+  kampus?: string;
+  /** Negara kampus baku; KOSONG = negara belum diketahui */
+  negara?: string;
   /** Saringan yang tidak mungkin terpenuhi (mis. kolom "Tetap" saat filter global "Bebas"). */
   tidakAda?: boolean;
 };
@@ -43,7 +52,8 @@ export type Saringan = {
 /** Penanda nilai kosong di saringan (mis. Status SK belum diisi). */
 export const KOSONG = "(kosong)";
 
-export function cocok({ input: i, hasil: h }: BarisDihitung, s: Saringan): boolean {
+export function cocok(b: BarisDihitung, s: Saringan): boolean {
+  const { input: i, hasil: h } = b;
   if (s.tidakAda) return false;
   const sedang = sama(i.statusAkhir, NILAI.SEDANG_TB);
   if (s.sedangTb !== undefined && sedang !== s.sedangTb) return false;
@@ -64,6 +74,9 @@ export function cocok({ input: i, hasil: h }: BarisDihitung, s: Saringan): boole
   if (s.presensiTbTerisi && !i.presensiTbSd) return false;
   if (s.statusSk !== undefined && (s.statusSk === KOSONG ? !!i.statusSk : !sama(i.statusSk, s.statusSk))) return false;
   if (s.adaCekData && !(h.cekData || h.peringatan.length)) return false;
+  if (s.biaya !== undefined && !sama(b.kelompok?.biaya, s.biaya)) return false;
+  if (s.kampus !== undefined && !sama(b.kelompok?.kampus, s.kampus)) return false;
+  if (s.negara !== undefined && !(s.negara === KOSONG ? !b.kelompok?.negara : sama(b.kelompok?.negara, s.negara))) return false;
   if (s.q) {
     const cari = s.q.trim().toLowerCase();
     const nama = (i.nama ?? "").toLowerCase();

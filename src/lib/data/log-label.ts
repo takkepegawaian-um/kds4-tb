@@ -35,6 +35,7 @@ export const LABEL_ENTITAS: Record<string, string> = {
   HariLibur: "Pengaturan: hari libur",
   PilihanNilai: "Pengaturan: daftar pilihan",
   PemetaanStatusSk: "Pengaturan: Status SK",
+  PembakuanNilai: "Pengaturan: pembakuan data",
   AturanHambatan: "Pengaturan: aturan hambatan",
   RekapResmiFakultas: "Pengaturan: rekap resmi",
   RekapPenerbitanSk: "Pengaturan: rekap penerbitan SK",

@@ -27,6 +27,9 @@ const SKEMA: Record<keyof Saringan, Tipe> = {
   statusSk: "teks",
   adaCekData: "bool",
   q: "teks",
+  biaya: "teks",
+  kampus: "teks",
+  negara: "teks",
   jenisTerisi: "bool",
   tidakAda: "bool",
 };

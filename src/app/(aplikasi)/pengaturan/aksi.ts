@@ -10,6 +10,7 @@ import { prisma } from "@/lib/db";
 import { keInputAturan } from "@/lib/data/peta";
 import { pratinjauIsiStatusSk, terapkanIsiStatusSk, type PratinjauIsiStatusSk } from "@/lib/data/isi-status-sk";
 import { bacaTanggal } from "@/lib/excel/data-tb";
+import { PILIHAN_KELOMPOK_BIAYA, kunciTeks, rapikanTeks, type JenisPembakuan } from "@/lib/aturan/sebaran";
 import {
   ATURAN_HAMBATAN_BAWAAN,
   KATEGORI_PILIHAN,
@@ -367,6 +368,57 @@ export async function simpanRekapSk(
   });
   revalidatePath("/", "layout");
   return { ok: true, pesan: log.length ? `${log.length} perubahan rekap disimpan.` : "Tidak ada yang berubah." };
+}
+
+// ---------------------------------------------------------------------------
+// Pembakuan data (Sumber biaya dan Tempat studi untuk diagram Sebaran)
+// ---------------------------------------------------------------------------
+
+export type BarisSimpanPembakuan = { asli: string; baku: string; negara: string };
+
+const NAMA_PEMBAKUAN: Record<JenisPembakuan, string> = { BIAYA: "Sumber biaya", KAMPUS: "Tempat studi" };
+
+export async function simpanPembakuan(jenis: string, baris: BarisSimpanPembakuan[]): Promise<HasilPengaturan> {
+  const email = await emailPengguna();
+  if (jenis !== "BIAYA" && jenis !== "KAMPUS") return { ok: false, pesan: "Jenis pembakuan tidak dikenal." };
+  const nama = NAMA_PEMBAKUAN[jenis];
+
+  const galat: Galat = {};
+  const bersih = baris.map((b) => {
+    const asli = rapikanTeks(b.asli ?? "").slice(0, 300);
+    const baku = rapikanTeks(b.baku ?? "").slice(0, 200);
+    const negara = rapikanTeks(b.negara ?? "").slice(0, 100);
+    if (!asli) galat[asli || "kosong"] = "Tulisan asli kosong";
+    if (jenis === "BIAYA" && baku && !PILIHAN_KELOMPOK_BIAYA.includes(baku)) galat[asli] = `Pilih ${PILIHAN_KELOMPOK_BIAYA.join(", ")}`;
+    return { asli, baku, negara: jenis === "KAMPUS" ? negara : "" };
+  });
+  if (Object.keys(galat).length) return { ok: false, pesan: pesanGalat, galat };
+
+  const lama = new Map((await prisma.pembakuanNilai.findMany({ where: { jenis } })).map((r) => [kunciTeks(r.asli), r]));
+  const log: Log[] = [];
+  await prisma.$transaction(async (tx) => {
+    for (const b of bersih) {
+      const l = lama.get(kunciTeks(b.asli));
+      if (!b.baku) {
+        if (!l) continue;
+        await tx.pembakuanNilai.delete({ where: { id: l.id } });
+        log.push({ entitas: "PembakuanNilai", entitasId: String(l.id), aksi: "HAPUS", kolom: `${nama}: ${l.asli}`, nilaiLama: l.negara ? `${l.baku} (${l.negara})` : l.baku });
+        continue;
+      }
+      if (!l) {
+        const r = await tx.pembakuanNilai.create({ data: { jenis, asli: b.asli, baku: b.baku, negara: b.negara || null } });
+        log.push({ entitas: "PembakuanNilai", entitasId: String(r.id), aksi: "TAMBAH", kolom: `${nama}: ${b.asli}`, nilaiBaru: b.negara ? `${b.baku} (${b.negara})` : b.baku });
+        continue;
+      }
+      if (l.baku === b.baku && (l.negara ?? "") === b.negara) continue;
+      await tx.pembakuanNilai.update({ where: { id: l.id }, data: { baku: b.baku, negara: b.negara || null } });
+      if (l.baku !== b.baku) log.push({ entitas: "PembakuanNilai", entitasId: String(l.id), aksi: "UBAH", kolom: `${nama}: ${l.asli}`, nilaiLama: l.baku, nilaiBaru: b.baku });
+      if ((l.negara ?? "") !== b.negara) log.push({ entitas: "PembakuanNilai", entitasId: String(l.id), aksi: "UBAH", kolom: `${nama}: ${l.asli} (negara)`, nilaiLama: l.negara, nilaiBaru: b.negara || null });
+    }
+    await catat(tx, email, log);
+  });
+  revalidatePath("/", "layout");
+  return { ok: true, pesan: log.length ? `${log.length} perubahan pembakuan ${nama} disimpan.` : "Tidak ada yang berubah." };
 }
 
 // ---------------------------------------------------------------------------

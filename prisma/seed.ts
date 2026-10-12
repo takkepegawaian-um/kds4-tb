@@ -14,6 +14,7 @@ import {
   REKAP_RESMI_FAKULTAS_BAWAAN,
   STATUS_SK_BAWAAN,
 } from "../src/lib/pengaturan/bawaan";
+import { PEMBAKUAN_BAWAAN } from "../src/lib/pengaturan/bawaan-pembakuan";
 
 async function main() {
   const hasil: Record<string, number> = {};
@@ -60,6 +61,12 @@ async function main() {
         data: REKAP_PENERBITAN_SK_BAWAAN.map((r, i) => ({ ...r, kelompok: r.kelompok ?? null, urutan: i + 1 })),
       })
     ).count;
+  }
+
+  // Pembakuan diisi hanya bila tabelnya masih kosong, supaya baris yang sengaja dikosongkan
+  // atau diubah admin tidak muncul kembali setiap kali aplikasi dipasang ulang.
+  if ((await prisma.pembakuanNilai.count()) === 0) {
+    hasil.pembakuan = (await prisma.pembakuanNilai.createMany({ data: PEMBAKUAN_BAWAAN, skipDuplicates: true })).count;
   }
 
   console.log("Pengisian awal selesai. Baris baru per tabel:", hasil);

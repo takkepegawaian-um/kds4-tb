@@ -7,7 +7,8 @@ import { semuaPengaturan } from "@/lib/pengaturan/baca";
 import { KOLOM_KATEGORI, STATUS_SK_SISTEM } from "@/lib/pengaturan/validasi";
 import { dariDb } from "@/lib/tanggal";
 import { hitungStatusSkKosong } from "@/lib/data/isi-status-sk";
-import { FormParameter, FormRekapFakultas, FormRekapSk, IsiStatusSkKosong, KelolaLibur, KelolaPilihan, TabelAturan, TabelStatusSk } from "./bagian";
+import { bacaPembakuanKelola } from "@/lib/data/pembakuan";
+import { FormParameter, FormRekapFakultas, FormRekapSk, IsiStatusSkKosong, KelolaLibur, KelolaPilihan, TabelAturan, TabelPembakuan, TabelStatusSk } from "./bagian";
 
 const BAGIAN = [
   ["parameter", "Parameter"],
@@ -15,6 +16,7 @@ const BAGIAN = [
   ["status-sk", "Status SK"],
   ["pilihan", "Daftar pilihan"],
   ["libur", "Hari libur"],
+  ["pembakuan", "Pembakuan data"],
   ["rekap", "Rekap manual"],
   ["perawatan", "Perawatan data"],
 ] as const;
@@ -68,7 +70,8 @@ async function IsiPengaturan() {
       .filter((g) => String(g[KOLOM_KATEGORI[k]] ?? "").toLowerCase() === nilai.toLowerCase())
       .reduce((t, g) => t + g._count, 0);
   };
-  const jumlahSkKosong = await hitungStatusSkKosong();
+  const [jumlahSkKosong, pembakuan] = await Promise.all([hitungStatusSkKosong(), bacaPembakuanKelola()]);
+  const saranUnik = (xs: string[]) => [...new Set(xs.filter(Boolean))].sort((a, b) => a.localeCompare(b, "id"));
   const urutanFak = pilihan.filter((p) => p.kategori === "FAKULTAS").map((p) => p.nilai);
   const tanggalRekap = parameter.find((p) => p.kunci === "tanggalRekapResmi")?.nilai ?? "";
 
@@ -118,6 +121,27 @@ async function IsiPengaturan() {
 
       <Bagian id="libur" judul="Hari libur nasional">
         <KelolaLibur libur={hariLibur.map((h) => ({ tanggal: dariDb(h.tanggal)!, keterangan: h.keterangan }))} />
+      </Bagian>
+
+      <Bagian id="pembakuan" judul="Pembakuan data untuk diagram Sebaran">
+        <div className="grid gap-4">
+          <TabelPembakuan
+            jenis="BIAYA"
+            judul="Sumber biaya"
+            keterangan="Kelompokkan tulisan Sumber biaya menjadi Beasiswa, Mandiri, atau Belum jelas. Isi Data TB tidak berubah."
+            baris={pembakuan.BIAYA}
+            saranBaku={[]}
+            saranNegara={[]}
+          />
+          <TabelPembakuan
+            jenis="KAMPUS"
+            judul="Tempat studi"
+            keterangan="Satukan berbagai tulisan nama kampus menjadi satu nama baku, dan isi negaranya. Isi Data TB tidak berubah."
+            baris={pembakuan.KAMPUS}
+            saranBaku={saranUnik(pembakuan.KAMPUS.map((b) => b.baku))}
+            saranNegara={saranUnik(pembakuan.KAMPUS.map((b) => b.negara))}
+          />
+        </div>
       </Bagian>
 
       <div id="rekap" className="grid scroll-mt-20 gap-6 xl:grid-cols-2">

@@ -53,6 +53,16 @@ export const MODEL_CADANGAN: Model[] = [
     hitung: () => prisma.pilihanNilai.count(),
   },
   {
+    nama: "PembakuanNilai",
+    tanggal: [],
+    pengaturan: true,
+    urutOtomatis: true,
+    ambil: () => prisma.pembakuanNilai.findMany({ orderBy: { id: "asc" } }),
+    hapusSemua: () => prisma.pembakuanNilai.deleteMany(),
+    masukkan: (data) => prisma.pembakuanNilai.createMany({ data }),
+    hitung: () => prisma.pembakuanNilai.count(),
+  },
+  {
     nama: "PemetaanStatusSk",
     tanggal: [],
     pengaturan: true,

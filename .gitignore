@@ -50,3 +50,7 @@ next-env.d.ts
 /src/generated/
 /backup/
 /.claude/
+/contoh-sk/
+/Template SK/
+*.docx
+*.doc

@@ -8,6 +8,7 @@ import { ArrowDown, ArrowUp, CheckCircle2, EyeOff, Eye, Lock, Plus, Trash2, XCir
 import clsx from "clsx";
 import { Tombol } from "@/components/ui";
 import { LEVEL } from "@/lib/aturan/pengaturan";
+import { PILIHAN_KELOMPOK_BIAYA } from "@/lib/aturan/sebaran";
 import { ATURAN_HAMBATAN_BAWAAN, STATUS_SK_BAWAAN } from "@/lib/pengaturan/bawaan";
 import { labelAbsensi } from "@/lib/aturan/label-absensi";
 import { formatTanggal } from "@/lib/tanggal";
@@ -23,6 +24,7 @@ import {
   simpanParameter,
   simpanRekapFakultas,
   simpanRekapSk,
+  simpanPembakuan,
   simpanStatusSk,
   tambahLibur,
   tambahPilihan,
@@ -527,6 +529,101 @@ export function FormRekapSk({ baris: awal }: { baris: { id: number; uraian: stri
       <BarisTombol>
         <Tombol type="button" onClick={() => setBaris((s) => [...s, { uraian: "", jumlah: "0", kelompok: null }])}><Plus size={16} /> Tambah baris</Tombol>
         <Tombol varian="utama" disabled={proses} onClick={() => jalankan(() => simpanRekapSk(baris))}>{proses ? "Menyimpan…" : "Simpan rekap SK"}</Tombol>
+      </BarisTombol>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Pembakuan data (Sumber biaya dan Tempat studi)
+// ---------------------------------------------------------------------------
+
+type BarisPembakuan = { asli: string; jumlah: number; baku: string; negara: string };
+
+export function TabelPembakuan({
+  jenis,
+  judul,
+  keterangan,
+  baris: awal,
+  saranBaku,
+  saranNegara,
+}: {
+  jenis: "BIAYA" | "KAMPUS";
+  judul: string;
+  keterangan: string;
+  baris: BarisPembakuan[];
+  saranBaku: string[];
+  saranNegara: string[];
+}) {
+  const [baris, setBaris] = useState<BarisPembakuan[]>(awal);
+  const [hanyaBelum, setHanyaBelum] = useState(() => awal.some((b) => !b.baku));
+  const { hasil, proses, jalankan, galat } = useAksi();
+  const belum = baris.filter((b) => !b.baku.trim()).length;
+  const ubah = (asli: string, k: "baku" | "negara", v: string) => setBaris((s) => s.map((b) => (b.asli === asli ? { ...b, [k]: v } : b)));
+  const tampil = hanyaBelum ? baris.filter((b) => !b.baku.trim()) : baris;
+  const idDaftar = `saran-${jenis}`;
+
+  return (
+    <div className="rounded-xl border border-krem-200 p-4">
+      <div className="mb-1 flex flex-wrap items-baseline gap-x-3">
+        <h3 className="font-semibold text-hijau-900">{judul}</h3>
+        <span className={clsx("text-sm", belum ? "font-medium text-waspada-fg" : "text-aman-fg")}>
+          {belum ? `${belum} belum dikelompokkan` : "Semua sudah dikelompokkan"}
+        </span>
+      </div>
+      <p className="mb-3 text-sm text-gray-600">{keterangan}</p>
+      <div className="mb-3"><PesanHasil hasil={hasil} /></div>
+
+      <label className="mb-3 flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={hanyaBelum} onChange={(e) => setHanyaBelum(e.target.checked)} className="size-5 accent-hijau-900" />
+        Tampilkan hanya yang belum dikelompokkan
+      </label>
+
+      <datalist id={idDaftar}>{saranBaku.map((x) => <option key={x} value={x} />)}</datalist>
+      <datalist id={`${idDaftar}-negara`}>{saranNegara.map((x) => <option key={x} value={x} />)}</datalist>
+
+      <div className="max-h-[28rem] overflow-auto">
+        <table className="w-full min-w-[560px] text-sm">
+          <thead className="sticky top-0 border-b border-krem-200 bg-white text-left text-xs font-semibold tracking-[0.06em] text-gray-500 uppercase">
+            <tr>
+              <th className="px-2 py-2">Tulisan di Data TB</th>
+              <th className="px-2 py-2 text-right">Orang</th>
+              <th className="px-2 py-2">{jenis === "BIAYA" ? "Kelompok" : "Nama kampus baku"}</th>
+              {jenis === "KAMPUS" && <th className="px-2 py-2">Negara</th>}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-krem-100 align-top">
+            {tampil.length === 0 && (
+              <tr><td colSpan={4} className="px-2 py-4 text-gray-500">Tidak ada tulisan.</td></tr>
+            )}
+            {tampil.map((b) => (
+              <tr key={b.asli} className={clsx(!b.baku.trim() && "bg-waspada-bg/20")}>
+                <td className="px-2 py-1.5">{b.asli}</td>
+                <td className="px-2 py-1.5 text-right tabular-nums text-gray-600">{b.jumlah}</td>
+                <td className="px-2 py-1.5">
+                  {jenis === "BIAYA" ? (
+                    <select value={b.baku} onChange={(e) => ubah(b.asli, "baku", e.target.value)} aria-label={`Kelompok untuk ${b.asli}`} className={clsx(masukan(galat[b.asli]), "h-10")}>
+                      <option value="">(belum dikelompokkan)</option>
+                      {PILIHAN_KELOMPOK_BIAYA.map((k) => <option key={k}>{k}</option>)}
+                    </select>
+                  ) : (
+                    <input value={b.baku} list={idDaftar} onChange={(e) => ubah(b.asli, "baku", e.target.value)} placeholder="Kosongkan = belum dikelompokkan" aria-label={`Nama baku untuk ${b.asli}`} className={clsx(masukan(), "h-10 min-w-[14rem]")} />
+                  )}
+                </td>
+                {jenis === "KAMPUS" && (
+                  <td className="px-2 py-1.5">
+                    <input value={b.negara} list={`${idDaftar}-negara`} onChange={(e) => ubah(b.asli, "negara", e.target.value)} aria-label={`Negara untuk ${b.asli}`} className={clsx(masukan(), "h-10 w-40")} />
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <BarisTombol>
+        <Tombol varian="utama" disabled={proses} onClick={() => jalankan(() => simpanPembakuan(jenis, baris.map(({ asli, baku, negara }) => ({ asli, baku, negara }))))}>
+          {proses ? "Menyimpan…" : "Simpan"}
+        </Tombol>
       </BarisTombol>
     </div>
   );

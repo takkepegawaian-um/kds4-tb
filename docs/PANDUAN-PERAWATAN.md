@@ -63,7 +63,7 @@ tanpa sengaja.
 4. Masuk ke aplikasi dan periksa Ringkasan.
 
 Pemulihan sudah diuji: cadangan → database kosong → cadangan ulang menghasilkan isi yang
-identik di 12 tabel, dan hasil hitungnya tetap sama persis dengan Excel.
+identik di semua tabel, dan hasil hitungnya tetap sama persis dengan Excel.
 
 ## 3. Memperbarui aplikasi
 

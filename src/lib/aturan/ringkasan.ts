@@ -7,6 +7,7 @@
 import { NILAI } from "./mesin";
 import type { PengaturanAturan } from "./pengaturan";
 import { angka, saring, type Angka, type BarisDihitung, type Saringan } from "./saringan";
+import { hitungSebaran } from "./sebaran";
 
 export type PerJenis = { bebas: Angka; tetap: Angka; total: number; semua: Angka };
 
@@ -155,6 +156,7 @@ export function hitungRingkasan(
     fakultas,
     masaTb,
     presensi,
+    sebaran: hitungSebaran(baris, s),
   };
 }
 

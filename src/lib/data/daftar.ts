@@ -72,6 +72,9 @@ export function uraikanSaringan(s: Saringan, p: PengaturanAturan): string[] {
   if (s.presensiTbTerisi) u.push("Ditandai TB s.d. terisi");
   if (s.statusSk) u.push(s.statusSk === KOSONG ? "Status SK kosong" : `Status SK: ${s.statusSk}`);
   if (s.adaCekData) u.push("Ada catatan Cek data");
+  if (s.biaya) u.push(`Sumber biaya: ${s.biaya}`);
+  if (s.kampus) u.push(s.kampus === KOSONG ? "Tempat studi belum diisi" : `Kampus: ${s.kampus}`);
+  if (s.negara) u.push(s.negara === KOSONG ? "Negara kampus belum diketahui" : `Negara kampus: ${s.negara}`);
   return u;
 }
 
