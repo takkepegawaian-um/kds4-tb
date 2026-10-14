@@ -24,9 +24,16 @@ kotak **Urutkan**.
 
 ### 2. Menyiapkan rapat — menu **Daftar Perhatian**
 
-1. Isi **Tanggal acuan (simulasi)** dengan tanggal rapat (bila perlu), saring fakultas/level.
-2. Tekan **Ekspor PDF** untuk dicetak/dibagikan, atau **Ekspor Excel** untuk diolah.
-3. Bahas dari peringkat teratas: hambatan utama, pihak penahan, dan **saran tindakan**.
+1. Isi **Tanggal acuan (simulasi)** dengan tanggal rapat (bila perlu), lalu tekan **Terapkan**.
+2. **Saring dengan sekali klik:** klik tombol level (Kritis, Waspada, Perhatian) untuk langsung menyaring,
+   klik lagi untuk melepas. Klik juga fakultas, jenis, level, hambatan, atau pihak penahan di dalam baris
+   untuk menyaring menurut nilai itu; lepas lewat tanda × pada tombol di atas daftar.
+   Kotak cari dan **Jenis pelaksanaan** ada di bagian atas.
+3. **Urutkan:** klik judul kolom, klik lagi untuk membalik arah (panah menunjukkan arah). Di HP,
+   pakai tombol Urutkan di atas daftar.
+4. Tekan **Ekspor PDF** untuk dicetak/dibagikan, atau **Ekspor Excel** untuk diolah. Ekspor mengikuti
+   saringan dan urutan yang sedang tampil.
+5. Bahas dari peringkat teratas: hambatan utama, pihak penahan, dan **saran tindakan**.
 
 ### 3. Memperbarui data seseorang — menu **Data TB**
 

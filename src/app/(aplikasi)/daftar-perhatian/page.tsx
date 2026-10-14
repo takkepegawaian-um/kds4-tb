@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Suspense } from "react";
-import { FileDown, X } from "lucide-react";
+import { Suspense, type ReactNode } from "react";
+import { ArrowDown, ArrowUp, ChevronsUpDown, FileDown, X } from "lucide-react";
+import clsx from "clsx";
 import { JudulHalaman, Kartu, LencanaLevel, LEVEL, MemuatData, TombolTautan } from "@/components/ui";
 import { PanelSaring } from "@/components/panel-saring";
 import { saringanKeUrl } from "@/lib/aturan/saringan-url";
 import { acuanDariUrl } from "@/lib/data/acuan";
-import { uraikanSaringan, type Parameter } from "@/lib/data/daftar";
+import { uraikanSaringan, type Parameter, type Urut } from "@/lib/data/daftar";
 import { muatSemuaDihitung } from "@/lib/data/pegawai";
 import { pilihPerhatian } from "@/lib/data/perhatian";
 import { daftarPilihanForm } from "@/lib/pengaturan/baca";
@@ -34,31 +35,63 @@ function ubahUrl(p: Parameter, ganti: Record<string, string | undefined>): strin
   return q ? `/daftar-perhatian?${q}` : "/daftar-perhatian";
 }
 
-const URUT = { peringkat: "Peringkat", sisa: "Sisa hari (tersedikit dulu)", nama: "Nama", fakultas: "Fakultas" };
+/** Nilai di dalam baris yang bisa diklik untuk langsung menyaring daftar. */
+const tautanSaring = "hover:underline decoration-gray-400 underline-offset-2";
 
 async function IsiDaftar({ searchParams }: { searchParams: Promise<Parameter> }) {
   const p = await searchParams;
   const acuan = acuanDariUrl(p);
   const [{ baris, pengaturan, tanggalAcuan }, daftar] = await Promise.all([muatSemuaDihitung(acuan), daftarPilihanForm()]);
-  const { saringan, urut, hasil } = pilihPerhatian(baris, p);
+  const { saringan, urut, arah, hasil } = pilihPerhatian(baris, p);
   const tampilSaringan = { ...saringan, berhambatan: undefined };
   const label = uraikanSaringan(tampilSaringan, pengaturan);
 
-  const paramEkspor = new URLSearchParams({ ...Object.fromEntries(saringanKeUrl(tampilSaringan)), urut, ...(acuan ? { acuan } : {}) });
+  const paramEkspor = new URLSearchParams({ ...Object.fromEntries(saringanKeUrl(tampilSaringan)), urut, arah, ...(acuan ? { acuan } : {}) });
   const urlEkspor = (format: "xlsx" | "pdf") => `/daftar-perhatian/ekspor?${paramEkspor.toString()}&format=${format}`;
 
-  const pilih = (nama: string, isi: [string, string][], nilai: string) => (
-    <select name={nama} defaultValue={nilai} className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]">
-      <option value="">Semua</option>
-      {isi.map(([v, t]) => (
-        <option key={v} value={v}>{t}</option>
-      ))}
-    </select>
-  );
   const lbl = "mb-1 block text-sm font-medium text-gray-700";
-  const daftarPihak = [...new Set([...pengaturan.statusSk.map((s) => s.pihakPenahan), pengaturan.pihakStatusKosong])];
-  const kodeAktif = pengaturan.aturan.filter((a) => a.kode > 0);
-  const jumlahLevel = (l: string) => hasil.filter((b) => b.hasil.level === l).length;
+  const masukan = "h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]";
+
+  // Jumlah per level dihitung tanpa saringan level, supaya angka di tiap tombol level tetap terlihat
+  // dan satu klik langsung menyaring.
+  const tanpaLevel = Object.fromEntries(Object.entries(p).filter(([k]) => k !== "level"));
+  const untukLevel = pilihPerhatian(baris, tanpaLevel).hasil;
+  const jumlahLevel = (l: string) => untukLevel.filter((b) => b.hasil.level === l).length;
+  const levelAktif = saringan.level?.[0];
+
+  // Form pencarian hanya memuat kotak cari, jenis, dan tanggal acuan; saringan lain dibawa lewat kolom tersembunyi.
+  const dibawa = Object.entries(p).filter(([k, v]) => !["q", "jenis", "acuan"].includes(k) && satu(v));
+
+  const chipLevel = (aktif: boolean) =>
+    clsx(
+      "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[15px] transition-colors",
+      aktif ? "border-hijau-900 bg-white shadow-sm ring-2 ring-hijau-900/15" : "border-krem-300 bg-white/60 hover:border-hijau-900 hover:bg-white",
+    );
+
+  // Judul kolom yang bisa diurutkan: klik sekali mengurutkan, klik lagi membalik arah.
+  const kepalaUrut = (kunci: Urut, isi: ReactNode, opsi: { kanan?: boolean; padat?: boolean; kelas?: string } = {}) => {
+    const aktif = urut === kunci;
+    const Ikon = !aktif ? ChevronsUpDown : arah === "naik" ? ArrowUp : ArrowDown;
+    const href = ubahUrl(p, { urut: kunci, arah: aktif ? (arah === "naik" ? "turun" : "naik") : undefined });
+    return (
+      <th
+        className={clsx(opsi.padat ? "px-2 py-3" : "px-3 py-3", opsi.kanan && "text-right", opsi.kelas)}
+        aria-sort={aktif ? (arah === "naik" ? "ascending" : "descending") : undefined}
+      >
+        <Link
+          href={href}
+          prefetch={false}
+          className={clsx("inline-flex items-center gap-1 uppercase", aktif ? "text-hijau-900" : "hover:text-hijau-900")}
+        >
+          {isi}
+          <Ikon size={13} className={aktif ? "" : "opacity-40"} aria-hidden />
+        </Link>
+      </th>
+    );
+  };
+
+  // Urutan untuk layar kecil (tabel dengan judul kolom hanya tampil di layar lebar).
+  const URUT_HP: [Urut, string][] = [["peringkat", "Peringkat"], ["sisa", "Sisa hari"], ["nama", "Nama"]];
 
   return (
     <div className="grid gap-5">
@@ -71,48 +104,31 @@ async function IsiDaftar({ searchParams }: { searchParams: Promise<Parameter> })
         </TombolTautan>
       </div>
 
-      <PanelSaring jumlahAktif={label.length + (acuan ? 1 : 0)}>
+      <PanelSaring jumlahAktif={label.filter((t) => !t.startsWith("Level")).length + (acuan ? 1 : 0)}>
         <Kartu className="p-4 sm:p-5">
-          <form action="/daftar-perhatian" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="sm:col-span-2">
+          <form action="/daftar-perhatian" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
+            {dibawa.map(([k, v]) => (
+              <input key={k} type="hidden" name={k} value={satu(v)} />
+            ))}
+            <div className="sm:col-span-2 lg:col-span-1">
               <label className={lbl} htmlFor="q">Cari nama atau NIP</label>
-              <input id="q" name="q" type="search" defaultValue={saringan.q ?? ""} placeholder="Ketik nama atau NIP…"
-                className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]" />
+              <input id="q" name="q" type="search" defaultValue={saringan.q ?? ""} placeholder="Ketik nama atau NIP…" className={masukan} />
             </div>
             <div>
-              <label className={lbl}>Fakultas</label>
-              {pilih("fakultas", daftar.FAKULTAS.map((f) => [f, f]), saringan.fakultas ?? "")}
-            </div>
-            <div>
-              <label className={lbl}>Jenis pelaksanaan</label>
-              {pilih("jenis", daftar.JENIS_PELAKSANAAN.map((f) => [f, f]), saringan.jenis ?? "")}
-            </div>
-            <div>
-              <label className={lbl}>Level</label>
-              {pilih("level", LEVEL.filter((l) => l !== "Aman").map((l) => [l, l]), saringan.level?.join("|") ?? "")}
-            </div>
-            <div className="sm:col-span-2">
-              <label className={lbl}>Hambatan utama</label>
-              {pilih("kode", kodeAktif.map((a) => [String(a.kode), `${a.kode}. ${a.nama}`]), saringan.kode !== undefined ? String(saringan.kode) : "")}
-            </div>
-            <div>
-              <label className={lbl}>Pihak penahan</label>
-              {pilih("pihak", daftarPihak.map((x) => [x, x]), saringan.pihak ?? "")}
-            </div>
-            <div>
-              <label className={lbl}>Urutkan</label>
-              <select name="urut" defaultValue={urut} className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]">
-                {Object.entries(URUT).map(([k, v]) => (
-                  <option key={k} value={k}>{v}</option>
+              <label className={lbl} htmlFor="jenis">Jenis pelaksanaan</label>
+              <select id="jenis" name="jenis" defaultValue={saringan.jenis ?? ""} className={masukan}>
+                <option value="">Semua</option>
+                {daftar.JENIS_PELAKSANAAN.map((j) => (
+                  <option key={j} value={j}>{j}</option>
                 ))}
               </select>
             </div>
             <div>
               <label className={lbl} htmlFor="acuan">Tanggal acuan (simulasi)</label>
               <input id="acuan" name="acuan" defaultValue={acuan ? formatTanggal(acuan) : ""} placeholder={`${formatTanggal(tanggalAcuan)} (hari ini)`}
-                inputMode="numeric" className="h-11 w-full rounded-lg border border-krem-300 bg-white px-3 text-[15px]" />
+                inputMode="numeric" className={masukan} />
             </div>
-            <div className="flex items-end gap-3 sm:col-span-2 lg:col-span-3 lg:justify-end">
+            <div className="flex items-end gap-3 sm:col-span-2 lg:col-span-1">
               <button className="h-11 rounded-lg bg-hijau-900 px-5 text-[13px] font-semibold tracking-[0.08em] text-white uppercase hover:bg-hijau-800">
                 Terapkan
               </button>
@@ -124,31 +140,41 @@ async function IsiDaftar({ searchParams }: { searchParams: Promise<Parameter> })
         </Kartu>
       </PanelSaring>
 
+      {/* Level: satu klik langsung menyaring; klik lagi untuk melepas */}
       <div className="flex flex-wrap items-center gap-2 text-[15px]">
-        <span>
-          <b>{hasil.length}</b> orang · per {formatTanggal(tanggalAcuan)} ·
-        </span>
-        {LEVEL.filter((l) => l !== "Aman").map((l) => (
-          <span key={l} className="inline-flex items-center gap-1">
-            <LencanaLevel level={l} /> <b>{jumlahLevel(l)}</b>
-          </span>
-        ))}
-        {acuan && (
-          <Link href={ubahUrl(p, { acuan: undefined })} className="inline-flex items-center gap-1 rounded-full bg-emas-400 px-3 py-1 text-sm font-semibold text-hijau-900">
-            Simulasi {formatTanggal(acuan)} <X size={14} />
-          </Link>
-        )}
-        {Object.keys(tampilSaringan).map((k) => {
-          const teks = uraikanSaringan({ [k]: tampilSaringan[k as keyof typeof tampilSaringan] }, pengaturan)[0];
-          if (!teks) return null;
+        <Link href={ubahUrl(p, { level: undefined })} prefetch={false} aria-pressed={!levelAktif} className={chipLevel(!levelAktif)}>
+          Semua <b className="tabular-nums">{untukLevel.length}</b>
+        </Link>
+        {LEVEL.filter((l) => l !== "Aman").map((l) => {
+          const aktif = levelAktif === l;
           return (
-            <Link key={k} href={ubahUrl(p, { [k]: undefined })} title="Lepas saringan ini"
-              className="inline-flex items-center gap-1 rounded-full bg-emas-300/60 px-3 py-1 text-sm text-hijau-900 hover:bg-emas-300">
-              {teks} <X size={14} />
+            <Link key={l} href={ubahUrl(p, { level: aktif ? undefined : l })} prefetch={false} aria-pressed={aktif} className={chipLevel(aktif)}>
+              <LencanaLevel level={l} /> <b className="tabular-nums">{jumlahLevel(l)}</b>
             </Link>
           );
         })}
+        <span className="ml-1 text-sm text-gray-600">per {formatTanggal(tanggalAcuan)}</span>
       </div>
+
+      {(acuan || label.some((t) => !t.startsWith("Level"))) && (
+        <div className="flex flex-wrap items-center gap-2 text-[15px]">
+          {acuan && (
+            <Link href={ubahUrl(p, { acuan: undefined })} className="inline-flex items-center gap-1 rounded-full bg-emas-400 px-3 py-1 text-sm font-semibold text-hijau-900">
+              Simulasi {formatTanggal(acuan)} <X size={14} />
+            </Link>
+          )}
+          {Object.keys(tampilSaringan).filter((k) => k !== "level").map((k) => {
+            const teks = uraikanSaringan({ [k]: tampilSaringan[k as keyof typeof tampilSaringan] }, pengaturan)[0];
+            if (!teks) return null;
+            return (
+              <Link key={k} href={ubahUrl(p, { [k]: undefined })} title="Lepas saringan ini"
+                className="inline-flex items-center gap-1 rounded-full bg-emas-300/60 px-3 py-1 text-sm text-hijau-900 hover:bg-emas-300">
+                {teks} <X size={14} />
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       {hasil.length === 0 ? (
         <Kartu><p className="text-[15px] text-gray-600">Tidak ada orang berhambatan yang cocok dengan saringan ini.</p></Kartu>
@@ -158,35 +184,54 @@ async function IsiDaftar({ searchParams }: { searchParams: Promise<Parameter> })
             <table className="w-full text-sm">
               <thead className="sticky top-0 z-10 bg-krem-50 shadow-[0_1px_0_var(--color-krem-200)]">
                 <tr className="text-left text-xs font-semibold tracking-[0.06em] text-gray-500 uppercase">
-                  <th className="w-10 px-3 py-3 text-right">#</th>
-                  <th className="px-3 py-3">Nama / NIP</th>
-                  <th className="px-3 py-3">Fak. / Jenis</th>
-                  <th className="px-3 py-3">Level</th>
-                  <th className="w-[34%] px-3 py-3">Hambatan utama dan saran tindakan</th>
-                  <th className="px-3 py-3">Pihak penahan</th>
-                  <th className="px-3 py-3 whitespace-nowrap">Akhir efektif</th>
-                  <th className="px-3 py-3 text-right">Tertahan</th>
-                  <th className="px-3 py-3">Catatan</th>
+                  {kepalaUrut("peringkat", "#", { kanan: true, padat: true, kelas: "w-10" })}
+                  {kepalaUrut("nama", "Nama / NIP")}
+                  {kepalaUrut("fakultas", "Fak. / Jenis")}
+                  {kepalaUrut("skor", "Level", { padat: true })}
+                  {kepalaUrut("hambatan", "Hambatan dan saran tindakan", { kelas: "w-[34%] min-w-[15rem]" })}
+                  {kepalaUrut("pihak", "Pihak penahan")}
+                  {kepalaUrut("sisa", "Akhir efektif")}
+                  {kepalaUrut("tertahan", "Tertahan", { kanan: true, padat: true })}
+                  <th className="hidden w-[12%] px-3 py-3 2xl:table-cell">Catatan</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-krem-100 align-top">
                 {hasil.map(({ pegawai: o, hasil: h }) => (
                   <tr key={o.id} className="hover:bg-krem-50">
-                    <td className="px-3 py-2.5 text-right font-semibold tabular-nums">{h.peringkat}</td>
+                    <td className="px-2 py-2.5 text-right font-semibold tabular-nums">{h.peringkat}</td>
                     <td className="px-3 py-2.5">
                       <Link href={`/data-tb/${o.id}`} className="font-semibold text-hijau-900 hover:underline">{o.nama}</Link>
-                      <div className="font-mono text-xs text-gray-500">{o.nip}</div>
+                      <div className="font-mono text-[11px] text-gray-500">{o.nip}</div>
                     </td>
                     <td className="px-3 py-2.5 whitespace-nowrap">
-                      {o.fakultas ?? "–"}
-                      <div className="text-xs text-gray-500">{o.jenisPelaksanaan ?? "–"}</div>
+                      {o.fakultas ? (
+                        <Link href={ubahUrl(p, { fakultas: o.fakultas })} prefetch={false} title={`Saring fakultas ${o.fakultas}`} className={tautanSaring}>{o.fakultas}</Link>
+                      ) : "–"}
+                      <div className="text-xs text-gray-500">
+                        {o.jenisPelaksanaan ? (
+                          <Link href={ubahUrl(p, { jenis: o.jenisPelaksanaan })} prefetch={false} title={`Saring jenis ${o.jenisPelaksanaan}`} className={tautanSaring}>{o.jenisPelaksanaan}</Link>
+                        ) : "–"}
+                      </div>
                     </td>
-                    <td className="px-3 py-2.5">{h.level && <LencanaLevel level={h.level} />}</td>
+                    <td className="px-2 py-2.5">
+                      {h.level && (
+                        <Link href={ubahUrl(p, { level: h.level })} prefetch={false} title={`Saring level ${h.level}`} className="inline-block">
+                          <LencanaLevel level={h.level} />
+                        </Link>
+                      )}
+                    </td>
                     <td className="px-3 py-2.5">
-                      <div className="font-medium text-gray-900">{h.hambatan}</div>
+                      <Link href={ubahUrl(p, { kode: String(h.kode) })} prefetch={false} title="Saring hambatan ini" className={clsx("font-medium text-gray-900", tautanSaring)}>
+                        {h.hambatan}
+                      </Link>
                       <div className="mt-0.5 text-gray-600">{h.saran}</div>
+                      {o.catatan && <div className="mt-1 text-xs text-gray-500 italic 2xl:hidden">Catatan: {o.catatan}</div>}
                     </td>
-                    <td className="px-3 py-2.5">{h.pihakPenahan}</td>
+                    <td className="px-3 py-2.5">
+                      {h.pihakPenahan ? (
+                        <Link href={ubahUrl(p, { pihak: h.pihakPenahan })} prefetch={false} title={`Saring pihak ${h.pihakPenahan}`} className={tautanSaring}>{h.pihakPenahan}</Link>
+                      ) : "–"}
+                    </td>
                     <td className="px-3 py-2.5 whitespace-nowrap">
                       {formatTanggal(h.akhirEfektif) || "–"}
                       {h.sisaHari !== null && (
@@ -195,12 +240,30 @@ async function IsiDaftar({ searchParams }: { searchParams: Promise<Parameter> })
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 text-right tabular-nums">{h.hariTertahan ?? "–"}</td>
-                    <td className="max-w-[220px] px-3 py-2.5 text-gray-600">{o.catatan}</td>
+                    <td className="px-2 py-2.5 text-right tabular-nums">{h.hariTertahan ?? "–"}</td>
+                    <td className="hidden max-w-[220px] px-3 py-2.5 text-gray-600 2xl:table-cell">{o.catatan}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-sm lg:hidden">
+            <span className="text-gray-600">Urutkan:</span>
+            {URUT_HP.map(([k, t]) => {
+              const aktif = urut === k;
+              const Ikon = arah === "naik" ? ArrowUp : ArrowDown;
+              return (
+                <Link
+                  key={k}
+                  href={ubahUrl(p, { urut: k, arah: aktif ? (arah === "naik" ? "turun" : "naik") : undefined })}
+                  prefetch={false}
+                  className={clsx("inline-flex items-center gap-1 rounded-full border px-3 py-1", aktif ? "border-hijau-900 bg-white font-semibold text-hijau-900" : "border-krem-300 bg-white/60")}
+                >
+                  {t} {aktif && <Ikon size={13} aria-hidden />}
+                </Link>
+              );
+            })}
           </div>
 
           <ul className="grid gap-3 lg:hidden">

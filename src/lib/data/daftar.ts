@@ -16,35 +16,71 @@ export const PILIHAN_URUT = {
   sisa: "Sisa hari (tersedikit dulu)",
   fakultas: "Fakultas",
 } as const;
-export type Urut = keyof typeof PILIHAN_URUT;
+/** Kunci urutan tambahan yang dipakai judul kolom di Daftar Perhatian (tidak ada di dropdown Data TB). */
+const URUT_TAMBAHAN = ["hambatan", "pihak", "tertahan"] as const;
+export type Urut = keyof typeof PILIHAN_URUT | (typeof URUT_TAMBAHAN)[number];
+export type Arah = "naik" | "turun";
 
 const satu = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
 export function bacaUrut(p: Parameter, bawaan: Urut = "sisa"): Urut {
   const u = satu(p.urut);
-  return u && u in PILIHAN_URUT ? (u as Urut) : bawaan;
+  return u && (u in PILIHAN_URUT || (URUT_TAMBAHAN as readonly string[]).includes(u)) ? (u as Urut) : bawaan;
 }
 
-const pembanding: Record<Urut, (a: BarisDihitung, b: BarisDihitung) => number> = {
-  urutan: (a, b) => a.input.urutan - b.input.urutan,
-  // Tanpa peringkat ditaruh di akhir.
-  peringkat: (a, b) => (a.hasil.peringkat ?? Infinity) - (b.hasil.peringkat ?? Infinity) || a.input.urutan - b.input.urutan,
-  nama: (a, b) => (a.input.nama ?? "").localeCompare(b.input.nama ?? "", "id"),
-  skor: (a, b) => b.hasil.skor - a.hasil.skor || a.input.urutan - b.input.urutan,
-  // Sisa hari kosong ditaruh di akhir.
-  sisa: (a, b) => (a.hasil.sisaHari ?? Infinity) - (b.hasil.sisaHari ?? Infinity) || a.input.urutan - b.input.urutan,
-  fakultas: (a, b) => (a.input.fakultas ?? "~").localeCompare(b.input.fakultas ?? "~", "id") || a.input.urutan - b.input.urutan,
+/** Arah urutan dari alamat; kosong = arah alami kunci itu. */
+export function bacaArah(p: Parameter): Arah | undefined {
+  const a = satu(p.arah);
+  return a === "naik" || a === "turun" ? a : undefined;
+}
+
+type Nilai = number | string | null;
+
+/**
+ * Cara mengurutkan tiap kunci. `alami` = arah bila tidak diminta lain: "naik" = kecil/A dulu,
+ * "turun" = besar dulu (mis. skor tertinggi, hari tertahan terlama). Nilai kosong (null) selalu di akhir.
+ */
+export const KUNCI_URUT: Record<Urut, { ambil: (b: BarisDihitung) => Nilai; alami: Arah }> = {
+  urutan: { ambil: (b) => b.input.urutan, alami: "naik" },
+  peringkat: { ambil: (b) => b.hasil.peringkat, alami: "naik" },
+  nama: { ambil: (b) => b.input.nama ?? "", alami: "naik" },
+  skor: { ambil: (b) => b.hasil.skor, alami: "turun" },
+  sisa: { ambil: (b) => b.hasil.sisaHari, alami: "naik" },
+  fakultas: { ambil: (b) => b.input.fakultas || null, alami: "naik" },
+  hambatan: { ambil: (b) => b.hasil.kode, alami: "naik" },
+  pihak: { ambil: (b) => b.hasil.pihakPenahan || null, alami: "naik" },
+  tertahan: { ambil: (b) => b.hasil.hariTertahan, alami: "turun" },
 };
+
+const bandingkanNilai = (a: number | string, b: number | string) =>
+  typeof a === "string" || typeof b === "string" ? String(a).localeCompare(String(b), "id") : a - b;
+
+function pembanding(urut: Urut, arah?: Arah) {
+  const k = KUNCI_URUT[urut];
+  const balik = (arah ?? k.alami) !== "naik";
+  return (x: BarisDihitung, y: BarisDihitung) => {
+    const a = k.ambil(x);
+    const b = k.ambil(y);
+    if (a === null || b === null) {
+      if (a !== b) return a === null ? 1 : -1;
+    } else {
+      const c = bandingkanNilai(a, b);
+      if (c) return balik ? -c : c;
+    }
+    return x.input.urutan - y.input.urutan;
+  };
+}
 
 export function pilihBaris<T extends BarisDihitung>(
   baris: readonly T[],
   p: Parameter,
   opsi: { urutBawaan?: Urut; wajib?: Saringan } = {},
-): { saringan: Saringan; urut: Urut; hasil: T[] } {
+): { saringan: Saringan; urut: Urut; arah: Arah; hasil: T[] } {
   const saringan = { ...saringanDariUrl(p), ...opsi.wajib };
   const urut = bacaUrut(p, opsi.urutBawaan);
-  const hasil = (saring(baris, saringan) as T[]).sort(pembanding[urut]);
-  return { saringan, urut, hasil };
+  const arah = bacaArah(p) ?? KUNCI_URUT[urut].alami;
+  const hasil = (saring(baris, saringan) as T[]).sort(pembanding(urut, arah));
+  return { saringan, urut, arah, hasil };
 }
 
 /** Uraian saringan dalam kalimat sederhana, mis. "Jenis: Bebas", "Hambatan: kode 3". */

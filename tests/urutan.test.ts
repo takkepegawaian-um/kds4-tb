@@ -37,6 +37,40 @@ describe("urutan bawaan = sisa hari tersedikit dulu", () => {
     expect(sisa).toEqual([...sisa].sort((a, b) => a - b));
   });
 
+  it("arah urutan bisa dibalik, dan nilai kosong tetap di akhir", () => {
+    const naik = urutanBaris(pilihBaris(baris(data), { urut: "sisa", arah: "naik" }).hasil);
+    const turun = urutanBaris(pilihBaris(baris(data), { urut: "sisa", arah: "turun" }).hasil);
+    expect(naik).toEqual([5, 2, 4, 1, 3]);
+    expect(turun).toEqual([1, 4, 2, 5, 3]); // yang tanpa tanggal (3) tetap paling bawah
+    expect(pilihBaris(baris(data), { urut: "sisa", arah: "turun" }).arah).toBe("turun");
+  });
+
+  it("arah alami: skor dan tertahan terbesar dulu, selain itu kecil/A dulu", () => {
+    const b = baris(data);
+    expect(pilihBaris(b, { urut: "skor" }).arah).toBe("turun");
+    expect(pilihBaris(b, { urut: "tertahan" }).arah).toBe("turun");
+    expect(pilihBaris(b, { urut: "nama" }).arah).toBe("naik");
+    const skor = pilihBaris(b, { urut: "skor" }).hasil.map((x) => x.hasil.skor);
+    expect(skor).toEqual([...skor].sort((x, y) => y - x));
+    const skorNaik = pilihBaris(b, { urut: "skor", arah: "naik" }).hasil.map((x) => x.hasil.skor);
+    expect(skorNaik).toEqual([...skorNaik].sort((x, y) => x - y));
+  });
+
+  it("urutan menurut hambatan, pihak penahan, dan nama", () => {
+    const b = baris(data);
+    const kode = pilihBaris(b, { urut: "hambatan" }).hasil.map((x) => x.hasil.kode);
+    expect(kode).toEqual([...kode].sort((x, y) => x - y));
+    const pihak = pilihBaris(b, { urut: "pihak" }).hasil.map((x) => x.hasil.pihakPenahan ?? "");
+    expect(pihak).toEqual([...pihak].sort((x, y) => x.localeCompare(y, "id")));
+    expect(urutanBaris(pilihBaris(b, { urut: "nama", arah: "turun" }).hasil)).toEqual([5, 4, 3, 2, 1]);
+  });
+
+  it("kunci atau arah yang tidak dikenal diabaikan", () => {
+    const h = pilihBaris(baris(data), { urut: "sembarang", arah: "miring" });
+    expect(h.urut).toBe("sisa");
+    expect(h.arah).toBe("naik");
+  });
+
   it("pilihan urutan lain tetap bisa dipakai lewat alamat", () => {
     expect(urutanBaris(pilihBaris(baris(data), { urut: "urutan" }).hasil)).toEqual([1, 2, 3, 4, 5]);
     expect(pilihPerhatian(baris(data), { urut: "peringkat" }).urut).toBe("peringkat");
